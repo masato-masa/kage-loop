@@ -113,6 +113,15 @@ export const WORLDS: { name: string; levels: Level[] }[] = [
       },
     ],
   },
+  {
+    name: 'ちいさな へや',
+    levels: [
+      { id: '5-1', name: 'かべぎわ', T: 8, par: 3, rows: ['######', '#aB#E#', '##SbA#', '######'] },
+      { id: '5-2', name: 'まんなか', T: 8, par: 3, rows: ['######', '##Sb##', '#aBAE#', '######'] },
+      { id: '5-3', name: 'うら どおり', T: 8, par: 3, rows: ['######', '#ASa##', '#b#BE#', '######'] },
+      { id: '5-4', name: 'ぎゃくもどり', T: 8, par: 3, rows: ['######', '#bA#E#', '##SaB#', '######'] },
+    ],
+  },
 ];
 
 export const ALL_LEVELS: Level[] = WORLDS.flatMap((w) => w.levels);
