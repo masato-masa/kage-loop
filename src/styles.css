@@ -14,7 +14,7 @@ html, body, #root { height: 100%; margin: 0; }
 body {
   font-family: 'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic', system-ui, sans-serif;
   color: var(--ink);
-  background: radial-gradient(ellipse at 50% -10%, #3b2f85 0%, var(--bg1) 38%, var(--bg2) 100%) fixed;
+  background: linear-gradient(#0b082055, #0b082099 60%, #0b0820cc), url('./assets/bg.webp') center top / cover no-repeat fixed, var(--bg2);
   overscroll-behavior: none;
   touch-action: manipulation;
   user-select: none;
