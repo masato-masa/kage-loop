@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 .gh-pages
 assets-src/
+
+refs/
+.gh-pages
