@@ -7,7 +7,7 @@ import { ghostMasks, plateBit } from './game/engine';
 import { IMG } from './ui/assets';
 import solutions from './game/solutions.json';
 import { BoardView } from './ui/Board';
-import { isMuted, setMuted, sfx } from './ui/sound';
+import { isMuted, setMuted, sfx, startBgm, stopBgm } from './ui/sound';
 import { clearStars, loadStars, saveStar, type Stars } from './ui/storage';
 
 const QS = new URLSearchParams(location.search);
@@ -374,6 +374,20 @@ function Game({ idx, stars, onBack, onStars, onNext }: { idx: number; stars: Sta
 }
 
 export default function App() {
+  // 最初のタップ・キーで BGM を始める（ブラウザは操作前の音を許さない）
+  useEffect(() => {
+    const go = () => startBgm();
+    window.addEventListener('pointerdown', go, { once: true });
+    window.addEventListener('keydown', go, { once: true });
+    // 画面が裏に回ったら止める
+    const vis = () => (document.hidden ? stopBgm() : startBgm());
+    document.addEventListener('visibilitychange', vis);
+    return () => {
+      document.removeEventListener('visibilitychange', vis);
+      window.removeEventListener('pointerdown', go);
+      window.removeEventListener('keydown', go);
+    };
+  }, []);
   const [screen, setScreen] = useState<Screen>(() => {
     const i = ALL_LEVELS.findIndex((l) => l.id === QS.get('lv'));
     return i >= 0 ? { name: 'play', idx: i } : { name: 'home' };
