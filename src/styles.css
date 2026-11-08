@@ -104,6 +104,7 @@ button:disabled { opacity: 0.38; cursor: default; }
 .pad .left { grid-column: 1; grid-row: 2; }
 .pad .wait { grid-column: 2; grid-row: 2; font-size: 14px; }
 .pad .right { grid-column: 3; grid-row: 2; }
+.pad .wait3 { grid-column: 1; grid-row: 1; font-size: 12px; }
 .pad .down { grid-column: 3; grid-row: 1; font-size: 20px; }
 
 .actions { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; flex: none; }

@@ -161,6 +161,21 @@ function Game({ idx, stars, onBack, onStars, onNext }: { idx: number; stars: Sta
     [b, say],
   );
 
+  const waiting = useRef(false);
+  const waitN = useCallback(
+    async (n: number) => {
+      if (waiting.current) return;
+      waiting.current = true;
+      for (let i = 0; i < n; i++) {
+        if (pRef.current.won) break;
+        move(0);
+        await new Promise((r) => window.setTimeout(r, 140));
+      }
+      waiting.current = false;
+    },
+    [move],
+  );
+
   const doUndo = useCallback(() => {
     sfx.undo();
     setP(undo(pRef.current));
@@ -265,6 +280,9 @@ function Game({ idx, stars, onBack, onStars, onNext }: { idx: number; stars: Sta
         </button>
         <button onClick={() => move(4)} aria-label="右" className="right">
           ▶
+        </button>
+        <button onClick={() => void waitN(3)} aria-label="3手待つ" className="wait3">
+          3手待つ
         </button>
         <button onClick={() => move(2)} aria-label="下" className="down">
           ▼
