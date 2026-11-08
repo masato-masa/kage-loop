@@ -60,8 +60,11 @@ button:disabled { opacity: 0.38; cursor: default; }
 .pips i { width: 6px; height: 12px; border-radius: 3px; background: #4a4278; display: block; }
 .pips i.used { background: var(--gold); }
 
-.stage { flex: 1 1 0; min-height: 0; display: grid; place-content: center; position: relative; }
-.board { position: relative; width: min(92vw, 496px, calc((100dvh - 330px) * var(--ratio, 1.4))); max-height: 100%; background: var(--wall); border-radius: 18px; padding: 0; overflow: hidden; box-shadow: 0 0 0 3px #4a3f94, 0 12px 28px #000a, inset 0 0 40px #0008; }
+.stage-wrap { flex: 1 1 0; min-height: 0; position: relative; display: flex; flex-direction: column; }
+.stage { flex: 1 1 0; min-height: 0; display: flex; align-items: center; position: relative; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
+.stage::-webkit-scrollbar { display: none; }
+.stage > .board { margin: 0 auto; flex: none; }
+.board { position: relative; width: max(min(92vw, 496px, calc((100dvh - 330px) * var(--ratio, 1.4))), calc(var(--w) * 46px)); min-width: 0; max-height: 100%; background: var(--wall); border-radius: 18px; padding: 0; overflow: hidden; box-shadow: 0 0 0 3px #4a3f94, 0 12px 28px #000a, inset 0 0 40px #0008; }
 .board.shake { animation: shake 0.28s; }
 @keyframes shake { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
 .cell { position: absolute; }
@@ -132,5 +135,5 @@ button:disabled { opacity: 0.38; cursor: default; }
 .confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 51; }
 .confetti i { position: absolute; top: -20px; left: var(--x); width: 9px; height: 14px; background: var(--c); border-radius: 2px; transform: rotate(var(--r)); animation: fall 2.4s ease-in var(--d) both; }
 @keyframes fall { to { transform: translateY(110vh) rotate(calc(var(--r) + 540deg)); opacity: 0.9; } }
-.record-flash { position: absolute; inset: -8px; border-radius: 22px; pointer-events: none; z-index: 15; background: radial-gradient(circle, #bfe6ffcc, transparent 70%); animation: rec 0.6s ease-out forwards; }
+.record-flash { position: absolute; inset: 8px 0; border-radius: 22px; pointer-events: none; z-index: 15; background: radial-gradient(circle, #bfe6ffcc, transparent 70%); animation: rec 0.6s ease-out forwards; }
 @keyframes rec { from { opacity: 1; transform: scale(0.7); } to { opacity: 0; transform: scale(1.25); } }

@@ -70,7 +70,7 @@ export function BoardView({ b, p, shake, answer }: { b: B; p: Play; shake: boole
   };
 
   return (
-    <div className={`board${shake ? ' shake' : ''}`} style={{ aspectRatio: `${b.w} / ${b.h}`, ['--ratio' as string]: b.w / b.h }}>
+    <div className={`board${shake ? ' shake' : ''}`} style={{ aspectRatio: `${b.w} / ${b.h}`, ['--ratio' as string]: b.w / b.h, ['--w' as string]: b.w }}>
       {cells}
       <svg className="trails" viewBox={`0 0 ${b.w} ${b.h}`} preserveAspectRatio="none" aria-hidden>
         {p.ghosts.map((g, gi) => (

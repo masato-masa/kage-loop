@@ -111,6 +111,7 @@ function Game({ idx, stars, onBack, onStars, onNext }: { idx: number; stars: Sta
   const [toast, setToast] = useState('');
   const [flash, setFlash] = useState(0);
   const [, force] = useState(0);
+  const stageRef = useRef<HTMLDivElement>(null);
   const pRef = useRef(p);
   pRef.current = p;
   const savedRef = useRef(false);
@@ -180,6 +181,16 @@ function Game({ idx, stars, onBack, onStars, onNext }: { idx: number; stars: Sta
     sfx.undo();
     setP(undo(pRef.current));
   }, []);
+
+  // 横長の盤は、主人公が真ん中に来るように横スクロールで追う
+  const meX = p.cur[p.cur.length - 1] % b.w;
+  useEffect(() => {
+    const el = stageRef.current;
+    const board = el?.querySelector<HTMLElement>('.board');
+    if (!el || !board || board.offsetWidth <= el.clientWidth) return;
+    const cell = board.offsetWidth / b.w;
+    el.scrollTo({ left: (meX + 0.5) * cell - el.clientWidth / 2, behavior: 'smooth' });
+  }, [meX, b.w, p.loops]);
 
   // クリアしたら記録
   useEffect(() => {
@@ -261,8 +272,10 @@ function Game({ idx, stars, onBack, onStars, onNext }: { idx: number; stars: Sta
         </span>
       </div>
 
-      <div className="stage" onPointerDown={onDown} onPointerUp={onUp}>
-        <BoardView b={b} p={p} shake={shake} answer={ans !== null && sol ? sol[ans] : null} />
+      <div className="stage-wrap">
+        <div className="stage" ref={stageRef} onPointerDown={onDown} onPointerUp={onUp}>
+          <BoardView b={b} p={p} shake={shake} answer={ans !== null && sol ? sol[ans] : null} />
+        </div>
         {flash > 0 && <div key={flash} className="record-flash" />}
         {toast && <div className="toast">{toast}</div>}
         {level.hint && p.loops === 1 && t === 0 && <div className="hint">{level.hint}</div>}
