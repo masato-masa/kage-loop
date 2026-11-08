@@ -75,7 +75,7 @@ describe('ルール', () => {
 describe('全面の検証', () => {
   it('どの面も par のループ数で解け、par - 1 では解けない（全探索、または下限と上限で証明）', () => {
     for (const level of ALL_LEVELS) {
-      const v = verify(parse(level), 5);
+      const v = verify(parse(level), 5, level.witness);
       expect(v.par, `${level.id}: 下限${v.lower} 上限${v.upper}`).toBe(level.par);
     }
   }, 300_000);

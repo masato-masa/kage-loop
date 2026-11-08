@@ -17,3 +17,5 @@
 - 効果音は WebAudio で合成（`src/ui/sound.ts`）。
 - **こたえ**: `npm run solutions`（`scripts/make-solutions.ts`）が各面の最少ループの動きを `src/game/solutions.json` に書く。面を足したら audit → solutions の順に走らせる。
   テストが答えを実際の操作で再生して出口に着くか確かめる（面を直して答えが古くなると落ちる）。
+- **重い面（逆の扉が 2 組以上）は witness**: 全探索が TooBig で落ちる面は、`Level.witness`（ループごとの動き `u d l r w`）を手で書く。
+  `verify` が「下限 = 逆の扉を床にした緩い版の厳密解」と「上限 = witness の再生」で挟んで par を証明する。こたえ（solutions.json）にも witness を使う。

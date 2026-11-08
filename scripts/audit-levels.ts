@@ -7,7 +7,7 @@ let bad = 0;
 for (const lv of ALL_LEVELS) {
   const t0 = Date.now();
   const b = parse(lv);
-  const r = verify(b, 5);
+  const r = verify(b, 5, lv.witness);
   const ok = r.par === lv.par;
   if (!ok) bad++;
   console.log(

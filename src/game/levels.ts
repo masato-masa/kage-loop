@@ -122,6 +122,20 @@ export const WORLDS: { name: string; levels: Level[] }[] = [
       { id: '5-4', name: 'ぎゃくもどり', T: 8, par: 3, rows: ['######', '#bA#E#', '##SaB#', '######'] },
     ],
   },
+  {
+    name: 'しましまの れんさ',
+    levels: [
+      {
+        id: '6-1',
+        name: 'みっつの かげ',
+        hint: '1 人目が降りたあとに 2 人目が通り、2 人目が降りたあとに 3 人目が通る。時刻をそろえる。',
+        T: 16,
+        par: 4,
+        rows: ['###############', '##a###b###c####', '#S.A.1.B.2.C.E#', '###############'],
+        witness: ['rud', 'rwrrrrud', 'rwrrrrwrrrru', 'rwrrrrwrrrrwrrr'],
+      },
+    ],
+  },
 ];
 
 export const ALL_LEVELS: Level[] = WORLDS.flatMap((w) => w.levels);

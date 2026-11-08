@@ -21,6 +21,8 @@ export interface Level {
   rows: string[];
   /** 最少ループ数（ソルバーで確かめた値。audit-levels が照合する） */
   par: number;
+  /** 重い面だけ: 手で作った解（ループごとの動き。u 上・d 下・l 左・r 右・w 待つ）。再生して出口に着くことをソルバーが確かめる */
+  witness?: string[];
 }
 
 export interface Board {
@@ -247,7 +249,34 @@ export interface Verdict {
 }
 
 /** 最少ループ数を確かめる。重い面は下限と上限で挟む。 */
-export function verify(b: Board, maxLoops = 5): Verdict {
+/** 手で作った解を再生して、各ループの位置の列を返す。出口に着かない・扉に阻まれるなら null */
+export function witnessPaths(b: Board, moves: string[]): number[][] | null {
+  const dirOf: Record<string, Dir> = { w: 0, u: 1, d: 2, l: 3, r: 4 };
+  const ghosts: number[][] = [];
+  const all: number[][] = [];
+  for (let i = 0; i < moves.length; i++) {
+    const masks = ghostMasks(b, ghosts);
+    const path = [b.start];
+    let pos = b.start;
+    if (moves[i].length > b.T) return null;
+    for (let t = 0; t < moves[i].length; t++) {
+      const to = target(b, pos, dirOf[moves[i][t]], occAt(b, masks, t, pos));
+      if (to === null) return null;
+      path.push(to);
+      pos = to;
+      if (to === b.exit) {
+        if (i !== moves.length - 1 || t !== moves[i].length - 1) return null;
+        all.push(path);
+        return all;
+      }
+    }
+    ghosts.push(path);
+    all.push(path);
+  }
+  return null;
+}
+
+export function verify(b: Board, maxLoops = 5, witness?: string[]): Verdict {
   try {
     const r = solve(b, maxLoops, 20000);
     return { par: r.loops, exact: true, lower: r.loops, upper: r.loops };
@@ -256,10 +285,20 @@ export function verify(b: Board, maxLoops = 5): Verdict {
   }
   // 逆の扉を床にした緩い版（解が増えるだけなので、最少ループ数の下限になる）
   const relaxed: Board = { ...b, cells: b.cells.map((c) => (c >= '1' && c <= '3' ? '.' : c)) };
-  const lower = solve(relaxed, maxLoops).loops;
+  let lower: number | null = null;
+  try {
+    lower = solve(relaxed, maxLoops).loops;
+  } catch (e) {
+    if (!(e instanceof TooBig)) throw e;
+  }
   let upper: number | null = null;
-  for (const runs of [1, 2]) {
-    upper = solve(b, maxLoops, 60000, runs).loops;
+  if (witness && witnessPaths(b, witness)) upper = witness.length;
+  for (const runs of upper === null ? [1, 2] : []) {
+    try {
+      upper = solve(b, maxLoops, 60000, runs).loops;
+    } catch (e) {
+      if (!(e instanceof TooBig)) throw e;
+    }
     if (upper !== null) break;
   }
   return { par: lower !== null && lower === upper ? lower : null, exact: false, lower, upper };
