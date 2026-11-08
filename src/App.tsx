@@ -109,6 +109,7 @@ function Game({ idx, stars, onBack, onStars, onNext }: { idx: number; stars: Sta
   const [ans, setAns] = useState<number | null>(null);
   const sol = (solutions as Record<string, number[][]>)[level.id] ?? null;
   const [toast, setToast] = useState('');
+  const [flash, setFlash] = useState(0);
   const [, force] = useState(0);
   const pRef = useRef(p);
   pRef.current = p;
@@ -147,8 +148,10 @@ function Game({ idx, stars, onBack, onStars, onNext }: { idx: number; stars: Sta
       const m1 = ghostMasks(b, next.ghosts);
       const t1 = Math.min(timeOf(next), b.T);
       const occAfter = m1[t1] | plateBit(b.cells[next.cur[next.cur.length - 1]]);
-      if (r.committed) sfx.record();
-      else if (next.won) sfx.win();
+      if (r.committed) {
+        sfx.record();
+        setFlash((n) => n + 1);
+      } else if (next.won) sfx.win();
       else if (occAfter !== occBefore) (occAfter & ~occBefore ? sfx.doorOpen : sfx.doorClose)();
       else sfx.step();
       if (r.committed) say(`${cur.loops} 回目がかげになった`);
@@ -245,6 +248,7 @@ function Game({ idx, stars, onBack, onStars, onNext }: { idx: number; stars: Sta
 
       <div className="stage" onPointerDown={onDown} onPointerUp={onUp}>
         <BoardView b={b} p={p} shake={shake} answer={ans !== null && sol ? sol[ans] : null} />
+        {flash > 0 && <div key={flash} className="record-flash" />}
         {toast && <div className="toast">{toast}</div>}
         {level.hint && p.loops === 1 && t === 0 && <div className="hint">{level.hint}</div>}
       </div>
@@ -303,6 +307,11 @@ function Game({ idx, stars, onBack, onStars, onNext }: { idx: number; stars: Sta
 
       {p.won && (
         <div className="modal win">
+          <div className="confetti" aria-hidden>
+            {Array.from({ length: 28 }, (_, i) => (
+              <i key={i} style={{ ['--x' as string]: `${(i * 37) % 100}%`, ['--d' as string]: `${(i % 7) * 0.12}s`, ['--c' as string]: ['#ffd479', '#59b4ff', '#7ee08a', '#ffb84d', '#ff8fb0'][i % 5], ['--r' as string]: `${(i * 53) % 360}deg` }} />
+            ))}
+          </div>
           <div className="sheet">
             <h3>クリア！</h3>
             <div className="big-stars">
