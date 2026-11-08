@@ -8,7 +8,7 @@ import { IMG } from './ui/assets';
 import solutions from './game/solutions.json';
 import { BoardView } from './ui/Board';
 import { isMuted, setMuted, sfx, startBgm, stopBgm } from './ui/sound';
-import { clearStars, loadStars, saveStar, type Stars } from './ui/storage';
+import { clearStars, hasSeen, loadLast, loadStars, markSeen, saveLast, saveStar, type Stars } from './ui/storage';
 
 const QS = new URLSearchParams(location.search);
 /** 確認用: ?all で全面を開く、?lv=2-1 でその面から始める */
@@ -21,6 +21,27 @@ const Star = ({ on }: { on: boolean }) => <span className={`star${on ? ' on' : '
 function Home({ stars, onPlay }: { stars: Stars; onPlay: (i: number) => void }) {
   const total = ALL_LEVELS.length;
   const got = Object.values(stars).reduce((a, s) => a + s, 0);
+  // 次にやる面 = まだ星の無い最初の面（全部終わっていたら最後に遊んだ面）
+  const nextIdx = (() => {
+    const i = ALL_LEVELS.findIndex((l) => !stars[l.id]);
+    if (i >= 0) return i;
+    const j = ALL_LEVELS.findIndex((l) => l.id === loadLast());
+    return j >= 0 ? j : 0;
+  })();
+  const next = ALL_LEVELS[nextIdx];
+  const started = Object.keys(stars).length > 0;
+  // 全面クリア済みのワールドは、見出しだけにたたむ（タップで開く）
+  const [fold, setFold] = useState<Record<string, boolean>>({});
+  const isFolded = (name: string, ls: { id: string }[]) => {
+    if (fold[name] !== undefined) return fold[name];
+    if (ls.some((l) => l.id === next.id)) return false;
+    if (ls.every((l) => stars[l.id])) return true; // クリア済み
+    const k = ALL_LEVELS.findIndex((l) => l.id === ls[0].id);
+    return !UNLOCK_ALL && !stars[ls[0].id] && k > 0 && !stars[ALL_LEVELS[k - 1].id]; // まだ来ていない
+  };
+  useEffect(() => {
+    if (nextIdx > 2) document.querySelector('.lv.next')?.scrollIntoView({ block: 'center' });
+  }, [nextIdx]);
   let idx = 0;
   return (
     <div className="home">
@@ -32,30 +53,50 @@ function Home({ stars, onPlay }: { stars: Stars; onPlay: (i: number) => void }) 
         </div>
         <h1>かげループ</h1>
         <p className="tag">過去の自分と、力を合わせて出口へ。</p>
+        <button className="primary go" onClick={() => onPlay(nextIdx)}>
+          {started ? 'つづきから' : 'はじめる'}　<b>{next.id}</b> {next.name}
+        </button>
       </div>
-      {WORLDS.map((w) => (
-        <section key={w.name} className="world">
-          <h2>{w.name}</h2>
-          <div className="lv-grid">
-            {w.levels.map((lv) => {
-              const i = idx++;
-              const s = stars[lv.id] ?? 0;
-              const open = UNLOCK_ALL || i === 0 || stars[ALL_LEVELS[i - 1].id] !== undefined || s > 0;
-              return (
-                <button key={lv.id} className={`lv${open ? '' : ' locked'}`} disabled={!open} onClick={() => onPlay(i)}>
-                  <b>{lv.id}</b>
-                  <span className="lv-name">{lv.name}</span>
-                  <span className="lv-stars">
-                    <Star on={s >= 1} />
-                    <Star on={s >= 2} />
-                    <Star on={s >= 3} />
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </section>
-      ))}
+      {WORLDS.map((w) => {
+        const folded = isFolded(w.name, w.levels);
+        const wGot = w.levels.reduce((a, l) => a + (stars[l.id] ?? 0), 0);
+        const start = idx;
+        idx += w.levels.length;
+        return (
+          <section key={w.name} className="world">
+            <h2>
+              <button className="world-head" aria-expanded={!folded} onClick={() => setFold({ ...fold, [w.name]: !folded })}>
+                <span>
+                  {folded ? '▸' : '▾'} {w.name}
+                </span>
+                <span className="world-got">
+                  ★ {wGot} / {w.levels.length * 3}
+                </span>
+              </button>
+            </h2>
+            {!folded && (
+              <div className="lv-grid">
+                {w.levels.map((lv, k) => {
+                  const i = start + k;
+                  const s = stars[lv.id] ?? 0;
+                  const open = UNLOCK_ALL || i === 0 || stars[ALL_LEVELS[i - 1].id] !== undefined || s > 0;
+                  return (
+                    <button key={lv.id} className={`lv${open ? '' : ' locked'}${i === nextIdx ? ' next' : ''}`} disabled={!open} onClick={() => onPlay(i)}>
+                      <b>{lv.id}</b>
+                      <span className="lv-name">{lv.name}</span>
+                      <span className="lv-stars">
+                        <Star on={s >= 1} />
+                        <Star on={s >= 2} />
+                        <Star on={s >= 3} />
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        );
+      })}
       <p className="count">
         ★ {got} / {total * 3}
       </p>
@@ -100,12 +141,55 @@ function Help({ onClose }: { onClose: () => void }) {
   );
 }
 
-function Game({ idx, stars, onBack, onStars, onNext }: { idx: number; stars: Stars; onBack: () => void; onStars: (s: Stars) => void; onNext: () => void }) {
+/** しましまの扉の初見説明（その扉が初めて出る面で 1 度だけ） */
+function InvIntro({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="modal" onClick={onClose}>
+      <div className="sheet" onClick={(e) => e.stopPropagation()}>
+        <h3>しましまの扉</h3>
+        <div className="inv-demo" aria-hidden>
+          <div className="inv-pair">
+            <div className="inv-cell">
+              <img src={IMG.plate[0]} alt="" />
+              <small>だれかが乗る</small>
+            </div>
+            <span>→</span>
+            <div className="inv-cell">
+              <img src={IMG.gate[0]} alt="" />
+              <span className="inv-mark" />
+              <small>とじる</small>
+            </div>
+          </div>
+          <div className="inv-pair">
+            <div className="inv-cell">
+              <img src={IMG.plate[0]} alt="" />
+              <small>だれもいない</small>
+            </div>
+            <span>→</span>
+            <div className="inv-cell open">
+              <img src={IMG.gate[0]} alt="" />
+              <span className="inv-mark" />
+              <small>あく</small>
+            </div>
+          </div>
+        </div>
+        <p>ふつうの扉と<b>反対</b>。同じ色のスイッチが<b>空いている間だけ</b>開く。かげを置きっぱなしにすると閉じたままになる。</p>
+        <button className="primary" onClick={onClose}>
+          わかった
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function Game({ idx, onBack, onStars, onNext }: { idx: number; onBack: () => void; onStars: (s: Stars) => void; onNext: () => void }) {
   const level = ALL_LEVELS[idx];
   const b = useMemo(() => parse(level), [level]);
   const [p, setP] = useState<Play>(() => newPlay(b));
   const [shake, setShake] = useState(false);
   const [help, setHelp] = useState(false);
+  const hasInv = level.rows.some((r) => /[123]/.test(r));
+  const [invIntro, setInvIntro] = useState(() => hasInv && !hasSeen('inv'));
   const [ans, setAns] = useState<number | null>(null);
   const sol = (solutions as Record<string, number[][]>)[level.id] ?? null;
   const [toast, setToast] = useState('');
@@ -116,6 +200,10 @@ function Game({ idx, stars, onBack, onStars, onNext }: { idx: number; stars: Sta
   pRef.current = p;
   const savedRef = useRef(false);
   const toastTimer = useRef<number | undefined>(undefined);
+
+  useEffect(() => {
+    saveLast(level.id);
+  }, [level.id]);
 
   useEffect(() => {
     setP(newPlay(b));
@@ -230,7 +318,6 @@ function Game({ idx, stars, onBack, onStars, onNext }: { idx: number; stars: Sta
 
   const t = timeOf(p);
   const left = b.T - t;
-  const best = stars[level.id] ?? 0;
   const earned = starsFor(p.loops, level.par);
   const last = idx === ALL_LEVELS.length - 1;
 
@@ -264,11 +351,6 @@ function Game({ idx, stars, onBack, onStars, onNext }: { idx: number; stars: Sta
             ))}
           </span>
           のこり <b>{left}</b>
-        </span>
-        <span className="pill">
-          {[1, 2, 3].map((n) => (
-            <Star key={n} on={n <= best} />
-          ))}
         </span>
       </div>
 
@@ -351,8 +433,21 @@ function Game({ idx, stars, onBack, onStars, onNext }: { idx: number; stars: Sta
               ))}
             </div>
             <p>
-              {p.loops} 回のループ（めやす {level.par}）
+              {p.loops} 回のループ
+              <br />
+              <span className="par">
+                {earned === 3
+                  ? p.loops === level.par
+                    ? 'さいしょうの回数！'
+                    : `★3 の条件（${level.par} 回以内）を達成`
+                  : `あと ${p.loops - level.par} 回へらすと ★3（${level.par} 回以内）`}
+              </span>
             </p>
+            {!last && (
+              <p className="par">
+                つぎ: <b>{ALL_LEVELS[idx + 1].id}</b> {ALL_LEVELS[idx + 1].name}
+              </p>
+            )}
             <div className="row">
               <button onClick={() => setP(newPlay(b))}>もういちど</button>
               {last ? (
@@ -369,6 +464,14 @@ function Game({ idx, stars, onBack, onStars, onNext }: { idx: number; stars: Sta
         </div>
       )}
       {help && <Help onClose={() => setHelp(false)} />}
+      {invIntro && !help && (
+        <InvIntro
+          onClose={() => {
+            markSeen('inv');
+            setInvIntro(false);
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -398,7 +501,6 @@ export default function App() {
     <Game
       key={screen.idx}
       idx={screen.idx}
-      stars={stars}
       onStars={setStars}
       onBack={() => setScreen({ name: 'home' })}
       onNext={() => setScreen({ name: 'play', idx: screen.idx + 1 })}
