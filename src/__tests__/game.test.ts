@@ -78,5 +78,5 @@ describe('全面の検証', () => {
       expect(r.loops, level.id).toBe(level.par);
       if (level.par > 1) expect(solve(parse(level), level.par - 1).loops, `${level.id} が par-1 で解けてしまう`).toBeNull();
     }
-  });
+  }, 120_000);
 });

@@ -157,47 +157,66 @@ export function nextMasks(b: Board, masks: number[], cap = 200000): Map<string, 
   return out;
 }
 
-/** 逆の扉が無い盤では、踏まれる範囲が広いほど必ず有利（単調）。他の下位互換になる組み合わせは捨てられる。 */
-function prune(list: number[][]): number[][] {
-  if (list.length < 2) return list;
-  const weight = (m: number[]) => m.reduce((a, v) => a + ((v & 1) + ((v >> 1) & 1) + ((v >> 2) & 1)), 0);
-  const sorted = list.map((m) => ({ m, w: weight(m) })).sort((x, y) => y.w - x.w);
-  const kept: number[][] = [];
-  for (const { m } of sorted) {
-    let dominated = false;
-    for (const k of kept) {
-      let sub = true;
-      for (let t = 0; t < m.length; t++) {
-        if ((m[t] & k[t]) !== m[t]) {
-          sub = false;
+/**
+ * 逆の扉が付いていないスイッチ（mono）は、踏まれる範囲が広いほど必ず有利。
+ * 逆の扉のスイッチ（それ以外のビット）が同じ組み合わせの中で、mono の踏み方が他の下位互換になるものは捨てる。
+ */
+function prune(list: number[][], mono: number): number[][] {
+  if (list.length < 2 || mono === 0) return list;
+  const groups = new Map<string, number[][]>();
+  for (const m of list) {
+    const key = m.map((v) => v & ~mono).join(',');
+    const g = groups.get(key);
+    if (g) g.push(m);
+    else groups.set(key, [m]);
+  }
+  const weight = (m: number[]) => m.reduce((a, v) => a + ((v & mono & 1) + ((v >> 1) & mono & 1) + ((v >> 2) & mono & 1)), 0);
+  const out: number[][] = [];
+  for (const g of groups.values()) {
+    const sorted = g.map((m) => ({ m, w: weight(m) })).sort((x, y) => y.w - x.w);
+    const kept: number[][] = [];
+    for (const { m } of sorted) {
+      let dominated = false;
+      for (const k of kept) {
+        let sub = true;
+        for (let t = 0; t < m.length; t++) {
+          if (((m[t] & mono) & k[t]) !== (m[t] & mono)) {
+            sub = false;
+            break;
+          }
+        }
+        if (sub) {
+          dominated = true;
           break;
         }
       }
-      if (sub) {
-        dominated = true;
-        break;
-      }
+      if (!dominated) kept.push(m);
     }
-    if (!dominated) kept.push(m);
+    out.push(...kept);
   }
-  return kept;
+  return out;
 }
 
-export function solve(b: Board, maxLoops = 5, cap = 40000): SolveResult {
-  const monotone = !b.cells.some((c) => c >= '1' && c <= '3');
+export function solve(b: Board, maxLoops = 5, cap = 60000): SolveResult {
+  // 逆の扉が付いているスイッチ以外は単調
+  let mono = 7;
+  for (const c of b.cells) if (c >= '1' && c <= '3') mono &= ~(1 << (c.charCodeAt(0) - 49));
   let level: number[][] = [new Array<number>(b.T + 1).fill(0)];
   for (let loops = 1; loops <= maxLoops; loops++) {
     let ways = 0;
     for (const m of level) if (canExit(b, m)) ways++;
     if (ways > 0) return { loops, ways };
     if (loops === maxLoops) break;
-    const next = new Map<string, number[]>();
+    let next = new Map<string, number[]>();
     for (const m of level) {
       for (const [k, v] of nextMasks(b, m)) next.set(k, v);
-      if (next.size > cap) throw new TooBig();
+      if (next.size > cap) {
+        // 途中でも下位互換を捨てて小さくする。それでも多すぎれば諦める。
+        next = new Map(prune([...next.values()], mono).map((v) => [v.join(','), v]));
+        if (next.size > cap / 2) throw new TooBig();
+      }
     }
-    level = [...next.values()];
-    if (monotone) level = prune(level);
+    level = prune([...next.values()], mono);
   }
   return { loops: null, ways: 0 };
 }
