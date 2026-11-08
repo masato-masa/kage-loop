@@ -129,7 +129,9 @@ export function canExit(b: Board, masks: number[]): boolean {
 }
 
 /** 次に作れる「かげ」の、スイッチ占有の列（重なり）を全部挙げる。 */
-export function nextMasks(b: Board, masks: number[]): Map<string, number[]> {
+export class TooBig extends Error {}
+
+export function nextMasks(b: Board, masks: number[], cap = 200000): Map<string, number[]> {
   const out = new Map<string, number[]>();
   // 状態 = (位置, 時刻, 自分がこれまでに踏んだ列)。踏んだ列が同じなら同じ効果として畳む。
   let cur = new Map<string, { pos: number; sig: number[] }>();
@@ -145,6 +147,7 @@ export function nextMasks(b: Board, masks: number[]): Map<string, number[]> {
         nxt.set(`${q}|${s2.join(',')}`, { pos: q, sig: s2 });
       }
     }
+    if (nxt.size > cap) throw new TooBig();
     cur = nxt;
   }
   for (const { sig } of cur.values()) {
@@ -154,16 +157,47 @@ export function nextMasks(b: Board, masks: number[]): Map<string, number[]> {
   return out;
 }
 
-export function solve(b: Board, maxLoops = 5): SolveResult {
-  let level = new Map<string, number[]>([['', new Array<number>(b.T + 1).fill(0)]]);
+/** 逆の扉が無い盤では、踏まれる範囲が広いほど必ず有利（単調）。他の下位互換になる組み合わせは捨てられる。 */
+function prune(list: number[][]): number[][] {
+  if (list.length < 2) return list;
+  const weight = (m: number[]) => m.reduce((a, v) => a + ((v & 1) + ((v >> 1) & 1) + ((v >> 2) & 1)), 0);
+  const sorted = list.map((m) => ({ m, w: weight(m) })).sort((x, y) => y.w - x.w);
+  const kept: number[][] = [];
+  for (const { m } of sorted) {
+    let dominated = false;
+    for (const k of kept) {
+      let sub = true;
+      for (let t = 0; t < m.length; t++) {
+        if ((m[t] & k[t]) !== m[t]) {
+          sub = false;
+          break;
+        }
+      }
+      if (sub) {
+        dominated = true;
+        break;
+      }
+    }
+    if (!dominated) kept.push(m);
+  }
+  return kept;
+}
+
+export function solve(b: Board, maxLoops = 5, cap = 40000): SolveResult {
+  const monotone = !b.cells.some((c) => c >= '1' && c <= '3');
+  let level: number[][] = [new Array<number>(b.T + 1).fill(0)];
   for (let loops = 1; loops <= maxLoops; loops++) {
     let ways = 0;
-    for (const m of level.values()) if (canExit(b, m)) ways++;
+    for (const m of level) if (canExit(b, m)) ways++;
     if (ways > 0) return { loops, ways };
     if (loops === maxLoops) break;
     const next = new Map<string, number[]>();
-    for (const m of level.values()) for (const [k, v] of nextMasks(b, m)) next.set(k, v);
-    level = next;
+    for (const m of level) {
+      for (const [k, v] of nextMasks(b, m)) next.set(k, v);
+      if (next.size > cap) throw new TooBig();
+    }
+    level = [...next.values()];
+    if (monotone) level = prune(level);
   }
   return { loops: null, ways: 0 };
 }

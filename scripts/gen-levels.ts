@@ -2,7 +2,7 @@
 //   npx tsx scripts/gen-levels.ts <幅> <高さ> <T> <目標ループ数> <秒> [逆の扉の数]
 // 条件: (1) 最少ループ数 = 目標  (2) 扉を 1 枚ずつ床にすると、どれも最少ループ数が減る（無駄な扉が無い）
 //       (3) スイッチを 1 つずつ床にすると、どれも解けなくなるか最少ループ数が増える。
-import { parse, solve, type Level } from '../src/game/engine';
+import { parse, solve, TooBig, type Level } from '../src/game/engine';
 
 const [W, H, T, GOAL, SEC, INV = '0'] = process.argv.slice(2).map(Number);
 let seed = Date.now() % 100000;
@@ -49,7 +49,7 @@ function make(): string[][] {
 }
 
 const lv = (rows: string[]): Level => ({ id: 'g', name: 'g', T, par: 0, rows });
-const loopsOf = (rows: string[]): number | null => solve(parse(lv(rows)), GOAL + 1).loops;
+const loopsOf = (rows: string[]): number | null => solve(parse(lv(rows)), GOAL + 1, 6000).loops;
 
 const t0 = Date.now();
 let tried = 0;
@@ -67,7 +67,13 @@ while (Date.now() - t0 < SEC * 1000) {
   } catch {
     continue;
   }
-  const base = solve(b, GOAL + 1).loops;
+  let base: number | null;
+  try {
+    base = solve(b, GOAL + 1, 6000).loops;
+  } catch (e) {
+    if (e instanceof TooBig) continue;
+    throw e;
+  }
   if (base !== GOAL) continue;
   // 無駄な扉・スイッチが無いか
   let ok = true;
@@ -78,7 +84,13 @@ while (Date.now() - t0 < SEC * 1000) {
       const isPlate = /[abc]/.test(c);
       if (!isDoor && !isPlate) continue;
       const r2 = rows.map((r, yy) => (yy === y ? r.slice(0, x) + '.' + r.slice(x + 1) : r));
-      const l2 = loopsOf(r2);
+      let l2: number | null;
+      try {
+        l2 = loopsOf(r2);
+      } catch {
+        ok = false;
+        continue;
+      }
       if (isDoor && !(l2 !== null && l2 < GOAL)) ok = false;
       if (isPlate && !(l2 === null || l2 > GOAL)) ok = false;
     }

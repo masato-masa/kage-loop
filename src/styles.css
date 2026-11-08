@@ -66,27 +66,28 @@ button:disabled { opacity: 0.38; cursor: default; }
 .cell.start { background: #4a3f86; }
 .cell.start::before { content: ''; position: absolute; inset: 24%; border: 2px dashed #ffffff55; border-radius: 50%; }
 
-.plate-disc { position: absolute; inset: 20%; border-radius: 50%; border: 3px solid var(--lc); background: radial-gradient(circle, #ffffff22, transparent 70%); transition: all 0.18s; }
-.plate.on .plate-disc { background: var(--lc); box-shadow: 0 0 18px var(--lc), inset 0 0 10px #fff9; transform: scale(0.88); }
-
-.gate { position: absolute; inset: 6%; border-radius: 8px; background: repeating-linear-gradient(90deg, var(--lc) 0 14%, #00000055 14% 20%); border: 3px solid var(--lc); box-shadow: 0 0 12px color-mix(in srgb, var(--lc) 60%, transparent); transition: all 0.22s; z-index: 2; }
-.door.inv .gate { background: repeating-linear-gradient(45deg, var(--lc) 0 10px, #1c1640 10px 20px); }
-.door.open .gate { opacity: 0.16; transform: scaleX(0.35); box-shadow: none; }
-.door.open { background: color-mix(in srgb, var(--lc) 14%, var(--floor)); }
-
-.exit { background: #2a2358; }
-.exit-ring { position: absolute; inset: 14%; border-radius: 50%; background: radial-gradient(circle, #fff7d0 0%, #ffd479 40%, #ff9d4a 70%, transparent 72%); box-shadow: 0 0 22px #ffcf6a; animation: glow 1.6s ease-in-out infinite; }
-@keyframes glow { 50% { transform: scale(1.12); filter: brightness(1.2); } }
+.prop { position: absolute; left: 4%; top: 4%; width: 92%; height: 92%; object-fit: contain; pointer-events: none; user-select: none; -webkit-user-drag: none; }
+.start-img { opacity: 0.85; left: 6%; top: 6%; width: 88%; height: 88%; }
+.plate-img { transition: transform 0.15s, filter 0.15s; filter: drop-shadow(0 3px 2px #0007); }
+.plate.on .plate-img { transform: translateY(8%) scale(0.92); filter: drop-shadow(0 0 10px var(--lc)) brightness(1.25) saturate(1.2); }
+.gate-img { transition: opacity 0.25s, transform 0.25s, filter 0.25s; z-index: 2; filter: drop-shadow(0 3px 3px #0008); }
+.door.open .gate-img { opacity: 0.2; transform: translateY(-14%) scaleY(0.7); filter: none; }
+.door.open { background: color-mix(in srgb, var(--lc) 16%, var(--floor)); }
+.inv-mark { position: absolute; inset: 14% 12% 8%; z-index: 3; pointer-events: none; border-radius: 40% 40% 6% 6% / 30% 30% 6% 6%; background: repeating-linear-gradient(45deg, #ffffff00 0 9px, #ffffff40 9px 15px); mix-blend-mode: screen; transition: opacity 0.25s; }
+.door.open .inv-mark { opacity: 0.1; }
+.exit-img { animation: glow 1.8s ease-in-out infinite; filter: drop-shadow(0 0 14px #ffcf6a); }
+@keyframes glow { 50% { transform: scale(1.05); filter: drop-shadow(0 0 20px #ffcf6a) brightness(1.1); } }
 
 .trails { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; }
 .ent { position: absolute; left: 0; top: 0; pointer-events: none; transition: transform 0.16s cubic-bezier(0.3, 1.4, 0.5, 1); z-index: 5; }
-.ent.ghost { z-index: 4; animation: bob 2.2s ease-in-out infinite; filter: drop-shadow(0 0 8px #9fd8ff88); }
+.ent.ghost { z-index: 4; animation: bob 2.2s ease-in-out infinite; opacity: 0.88; }
 .ent.me { z-index: 6; }
 .ent.won { animation: hop 0.5s ease infinite; }
 @keyframes bob { 50% { margin-top: -3%; } }
 @keyframes hop { 50% { margin-top: -10%; } }
-.face { width: 100%; height: 100%; display: block; }
-.ghost-no { position: absolute; right: 8%; top: 4%; font-style: normal; font-size: 11px; font-weight: 800; background: #1b1540; border: 1px solid #ffffff66; border-radius: 50%; width: 16px; height: 16px; display: grid; place-content: center; }
+.sprite { position: absolute; left: -12%; bottom: 4%; width: 124%; height: auto; max-height: 150%; object-fit: contain; display: block; pointer-events: none; user-select: none; filter-origin: center; }
+.ent.me .sprite { filter: drop-shadow(0 4px 3px #0008); }
+.ghost-no { position: absolute; right: 0; top: -4%; z-index: 2; font-style: normal; font-size: 11px; font-weight: 800; background: #1b1540; border: 1px solid #ffffff66; border-radius: 50%; width: 16px; height: 16px; display: grid; place-content: center; }
 
 .toast { position: absolute; left: 50%; bottom: 6px; transform: translateX(-50%); background: #000b; border: 1px solid #ffffff33; border-radius: 12px; padding: 8px 12px; font-size: 13px; white-space: nowrap; z-index: 20; }
 .hint { position: absolute; left: 0; right: 0; bottom: -4px; text-align: center; font-size: 12px; color: var(--sub); padding: 0 8px; }

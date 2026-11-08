@@ -30,6 +30,32 @@ export const WORLDS: { name: string; levels: Level[] }[] = [
       },
     ],
   },
+  {
+    name: 'つながる とびら',
+    levels: [
+      {
+        id: '2-1',
+        name: 'くさり',
+        hint: 'かげが開けた扉を、次のかげが通って、次のスイッチを踏む。',
+        T: 12,
+        par: 3,
+        rows: ['###########', '#a####b####', '#.####.####', '#S.A...B.E#', '###########'],
+      },
+    ],
+  },
+  {
+    name: 'しましまの とびら',
+    levels: [
+      {
+        id: '3-1',
+        name: 'おきっぱなしは だめ',
+        hint: 'しましまの扉は、同じ色のスイッチが空いている間だけ開く。かげが降りるタイミングを考えよう。',
+        T: 8,
+        par: 2,
+        rows: ['#########', '#S.A.1.E#', '##a######'],
+      },
+    ],
+  },
 ];
 
 export const ALL_LEVELS: Level[] = WORLDS.flatMap((w) => w.levels);

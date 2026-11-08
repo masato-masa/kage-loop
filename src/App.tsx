@@ -8,6 +8,10 @@ import { BoardView } from './ui/Board';
 import { isMuted, setMuted, sfx } from './ui/sound';
 import { clearStars, loadStars, saveStar, type Stars } from './ui/storage';
 
+const QS = new URLSearchParams(location.search);
+/** 確認用: ?all で全面を開く、?lv=2-1 でその面から始める */
+const UNLOCK_ALL = QS.has('all');
+
 type Screen = { name: 'home' } | { name: 'play'; idx: number };
 
 const Star = ({ on }: { on: boolean }) => <span className={`star${on ? ' on' : ''}`}>★</span>;
@@ -29,7 +33,7 @@ function Home({ stars, onPlay }: { stars: Stars; onPlay: (i: number) => void }) 
             {w.levels.map((lv) => {
               const i = idx++;
               const s = stars[lv.id] ?? 0;
-              const open = i === 0 || stars[ALL_LEVELS[i - 1].id] !== undefined || s > 0;
+              const open = UNLOCK_ALL || i === 0 || stars[ALL_LEVELS[i - 1].id] !== undefined || s > 0;
               return (
                 <button key={lv.id} className={`lv${open ? '' : ' locked'}`} disabled={!open} onClick={() => onPlay(i)}>
                   <b>{lv.id}</b>
@@ -302,7 +306,10 @@ function Game({ idx, stars, onBack, onStars, onNext }: { idx: number; stars: Sta
 }
 
 export default function App() {
-  const [screen, setScreen] = useState<Screen>({ name: 'home' });
+  const [screen, setScreen] = useState<Screen>(() => {
+    const i = ALL_LEVELS.findIndex((l) => l.id === QS.get('lv'));
+    return i >= 0 ? { name: 'play', idx: i } : { name: 'home' };
+  });
   const [stars, setStars] = useState<Stars>(() => loadStars());
   if (screen.name === 'home') return <Home stars={stars} onPlay={(i) => setScreen({ name: 'play', idx: i })} />;
   return (
