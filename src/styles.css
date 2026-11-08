@@ -26,6 +26,11 @@ button:disabled { opacity: 0.38; cursor: default; }
 .home { max-width: 520px; margin: 0 auto; padding: 28px 16px 40px; }
 .home-hero { text-align: center; padding: 18px 0 8px; }
 .home h1 { margin: 0; font-size: 44px; letter-spacing: 6px; color: var(--gold); text-shadow: 0 0 22px #ffb84d88, 0 3px 0 #6b3d00; }
+.home-chars { position: relative; height: 150px; width: 260px; margin: 0 auto 4px; }
+.hc { position: absolute; bottom: 0; user-select: none; -webkit-user-drag: none; }
+.hc-hero { left: 14px; height: 140px; filter: drop-shadow(0 6px 4px #0008); animation: bob 3s ease-in-out infinite; }
+.hc-ghost { left: 96px; height: 120px; opacity: 0.7; animation: bob 3s ease-in-out -1.2s infinite; }
+.hc-exit { right: 0; height: 88px; filter: drop-shadow(0 0 16px #ffcf6a); animation: glow 2s ease-in-out infinite; }
 .tag { color: var(--sub); margin: 8px 0 0; }
 .world { margin-top: 26px; }
 .world h2 { font-size: 15px; letter-spacing: 3px; color: var(--sub); margin: 0 0 10px; font-weight: 700; }

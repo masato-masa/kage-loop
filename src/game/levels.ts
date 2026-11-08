@@ -78,6 +78,27 @@ export const WORLDS: { name: string; levels: Level[] }[] = [
       },
     ],
   },
+  {
+    name: 'さんにんの かげ',
+    levels: [
+      {
+        id: '4-1',
+        name: 'ドミノ',
+        hint: '1 人目が開けた扉を 2 人目が通り、2 人目が開けた扉を 3 人目が通る。',
+        T: 12,
+        par: 4,
+        rows: ['#############', '#a###b##c####', '#S.A..B..C.E#', '#############'],
+      },
+      {
+        id: '4-2',
+        name: 'じゅんばんこ',
+        hint: '開ける・どく・次が開ける・どく。かげが立つ順番を、時刻ごとにそろえる。',
+        T: 14,
+        par: 3,
+        rows: ['#############', '##a###b######', '#S.A.1.B.2.E#', '#############'],
+      },
+    ],
+  },
 ];
 
 export const ALL_LEVELS: Level[] = WORLDS.flatMap((w) => w.levels);

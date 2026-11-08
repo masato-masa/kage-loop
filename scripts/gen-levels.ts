@@ -1,10 +1,10 @@
 // 条件を満たす面を探す。使い方:
-//   npx tsx scripts/gen-levels.ts <幅> <高さ> <T> <目標ループ数> <秒> [逆の扉の数]
+//   npx tsx scripts/gen-levels.ts <幅> <高さ> <T> <目標ループ数> <秒> [逆の扉の数] [スイッチの組の数 2|3]
 // 条件: (1) 最少ループ数 = 目標  (2) 扉を 1 枚ずつ床にすると、どれも最少ループ数が減る（無駄な扉が無い）
 //       (3) スイッチを 1 つずつ床にすると、どれも解けなくなるか最少ループ数が増える。
 import { parse, solve, TooBig, type Level } from '../src/game/engine';
 
-const [W, H, T, GOAL, SEC, INV = '0'] = process.argv.slice(2).map(Number);
+const [W, H, T, GOAL, SEC, INV = 0, PAIRS = 2] = process.argv.slice(2).map(Number);
 let seed = Date.now() % 100000;
 const rnd = () => {
   seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
@@ -44,6 +44,10 @@ function make(): string[][] {
   put('b');
   put('A');
   put('B');
+  if (PAIRS >= 3) {
+    put('c');
+    put('C');
+  }
   for (let i = 0; i < nInv; i++) put(String(i + 1));
   return g;
 }

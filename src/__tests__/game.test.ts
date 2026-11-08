@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { canExit, ghostMasks, parse, solve } from '../game/engine';
+import { canExit, ghostMasks, parse, solve, verify } from '../game/engine';
 import { ALL_LEVELS } from '../game/levels';
 import { backLoop, commit, endLoop, newPlay, step, undo } from '../game/play';
 
@@ -72,11 +72,10 @@ describe('ルール', () => {
 });
 
 describe('全面の検証', () => {
-  it('どの面も par のループ数で解け、par - 1 では解けない', () => {
+  it('どの面も par のループ数で解け、par - 1 では解けない（全探索、または下限と上限で証明）', () => {
     for (const level of ALL_LEVELS) {
-      const r = solve(parse(level), level.par);
-      expect(r.loops, level.id).toBe(level.par);
-      if (level.par > 1) expect(solve(parse(level), level.par - 1).loops, `${level.id} が par-1 で解けてしまう`).toBeNull();
+      const v = verify(parse(level), 5);
+      expect(v.par, `${level.id}: 下限${v.lower} 上限${v.upper}`).toBe(level.par);
     }
-  }, 120_000);
+  }, 300_000);
 });

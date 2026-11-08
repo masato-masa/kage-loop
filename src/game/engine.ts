@@ -131,7 +131,22 @@ export function canExit(b: Board, masks: number[]): boolean {
 /** 次に作れる「かげ」の、スイッチ占有の列（重なり）を全部挙げる。 */
 export class TooBig extends Error {}
 
-export function nextMasks(b: Board, masks: number[], cap = 200000): Map<string, number[]> {
+/** スイッチごとに「踏んでいる連続区間」が maxRuns 個を超えたか */
+function tooManyRuns(sig: number[], maxRuns: number): boolean {
+  for (let k = 0; k < 3; k++) {
+    let runs = 0;
+    let prev = 0;
+    for (const v of sig) {
+      const on = (v >> k) & 1;
+      if (on && !prev) runs++;
+      prev = on;
+    }
+    if (runs > maxRuns) return true;
+  }
+  return false;
+}
+
+export function nextMasks(b: Board, masks: number[], cap = 200000, maxRuns = 99): Map<string, number[]> {
   const out = new Map<string, number[]>();
   // 状態 = (位置, 時刻, 自分がこれまでに踏んだ列)。踏んだ列が同じなら同じ効果として畳む。
   let cur = new Map<string, { pos: number; sig: number[] }>();
@@ -144,6 +159,7 @@ export function nextMasks(b: Board, masks: number[], cap = 200000): Map<string, 
         const q = target(b, pos, d as Dir, occ);
         if (q === null) continue;
         const s2 = sig.concat(plateBitAt(b, q));
+        if (maxRuns < 99 && tooManyRuns(s2, maxRuns)) continue;
         nxt.set(`${q}|${s2.join(',')}`, { pos: q, sig: s2 });
       }
     }
@@ -197,7 +213,7 @@ function prune(list: number[][], mono: number): number[][] {
   return out;
 }
 
-export function solve(b: Board, maxLoops = 5, cap = 60000): SolveResult {
+export function solve(b: Board, maxLoops = 5, cap = 60000, maxRuns = 99): SolveResult {
   // 逆の扉が付いているスイッチ以外は単調
   let mono = 7;
   for (const c of b.cells) if (c >= '1' && c <= '3') mono &= ~(1 << (c.charCodeAt(0) - 49));
@@ -209,7 +225,7 @@ export function solve(b: Board, maxLoops = 5, cap = 60000): SolveResult {
     if (loops === maxLoops) break;
     let next = new Map<string, number[]>();
     for (const m of level) {
-      for (const [k, v] of nextMasks(b, m)) next.set(k, v);
+      for (const [k, v] of nextMasks(b, m, 200000, maxRuns)) next.set(k, v);
       if (next.size > cap) {
         // 途中でも下位互換を捨てて小さくする。それでも多すぎれば諦める。
         next = new Map(prune([...next.values()], mono).map((v) => [v.join(','), v]));
@@ -219,4 +235,32 @@ export function solve(b: Board, maxLoops = 5, cap = 60000): SolveResult {
     level = prune([...next.values()], mono);
   }
   return { loops: null, ways: 0 };
+}
+
+export interface Verdict {
+  /** 確定した最少ループ数（証明できなければ null） */
+  par: number | null;
+  /** 厳密に全探索できたか。false のときは下限（逆の扉を床にした緩い版）と上限（かげの立ち方を 1 回の連続に絞った探索）で挟んで証明した */
+  exact: boolean;
+  lower: number | null;
+  upper: number | null;
+}
+
+/** 最少ループ数を確かめる。重い面は下限と上限で挟む。 */
+export function verify(b: Board, maxLoops = 5): Verdict {
+  try {
+    const r = solve(b, maxLoops, 20000);
+    return { par: r.loops, exact: true, lower: r.loops, upper: r.loops };
+  } catch (e) {
+    if (!(e instanceof TooBig)) throw e;
+  }
+  // 逆の扉を床にした緩い版（解が増えるだけなので、最少ループ数の下限になる）
+  const relaxed: Board = { ...b, cells: b.cells.map((c) => (c >= '1' && c <= '3' ? '.' : c)) };
+  const lower = solve(relaxed, maxLoops).loops;
+  let upper: number | null = null;
+  for (const runs of [1, 2]) {
+    upper = solve(b, maxLoops, 60000, runs).loops;
+    if (upper !== null) break;
+  }
+  return { par: lower !== null && lower === upper ? lower : null, exact: false, lower, upper };
 }

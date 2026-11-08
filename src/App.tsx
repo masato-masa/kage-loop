@@ -4,6 +4,7 @@ import { type Dir, parse } from './game/engine';
 import { ALL_LEVELS, WORLDS } from './game/levels';
 import { backLoop, endLoop, newPlay, type Play, resetLoop, starsFor, step, timeOf, undo } from './game/play';
 import { ghostMasks, plateBit } from './game/engine';
+import { IMG } from './ui/assets';
 import { BoardView } from './ui/Board';
 import { isMuted, setMuted, sfx } from './ui/sound';
 import { clearStars, loadStars, saveStar, type Stars } from './ui/storage';
@@ -23,6 +24,11 @@ function Home({ stars, onPlay }: { stars: Stars; onPlay: (i: number) => void }) 
   return (
     <div className="home">
       <div className="home-hero">
+        <div className="home-chars" aria-hidden>
+          <img className="hc hc-hero" src={IMG.hero} alt="" draggable={false} />
+          <img className="hc hc-ghost" src={IMG.ghost} alt="" draggable={false} />
+          <img className="hc hc-exit" src={IMG.exit} alt="" draggable={false} />
+        </div>
         <h1>かげループ</h1>
         <p className="tag">過去の自分と、力を合わせて出口へ。</p>
       </div>
