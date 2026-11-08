@@ -55,6 +55,13 @@ export const WORLDS: { name: string; levels: Level[] }[] = [
         par: 3,
         rows: ['#######', '#a#b..#', '#.SA#.#', '#..#EB#', '#######'],
       },
+      {
+        id: '2-4',
+        name: 'いれかわり',
+        T: 9,
+        par: 3,
+        rows: ['#######', '#ASaB##', '#b##E##', '#######'],
+      },
     ],
   },
   {
@@ -75,6 +82,13 @@ export const WORLDS: { name: string; levels: Level[] }[] = [
         T: 11,
         par: 3,
         rows: ['############', '#S.A..1.B.E#', '##a##b######', '############'],
+      },
+      {
+        id: '3-3',
+        name: 'せまい へや',
+        T: 9,
+        par: 3,
+        rows: ['#######', '#a1ABE#', '##Sb###', '#######'],
       },
     ],
   },
