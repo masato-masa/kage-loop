@@ -264,3 +264,114 @@ export function verify(b: Board, maxLoops = 5): Verdict {
   }
   return { par: lower !== null && lower === upper ? lower : null, exact: false, lower, upper };
 }
+
+// ---------------------------------------------------------------------------
+// ヒント: 今のかげの状態から、次の 1 ループでどう動けばよいかを出す。
+
+function exitPath(b: Board, masks: number[]): number[] | null {
+  type St = { pos: number; path: number[] };
+  let cur = new Map<number, St>([[b.start, { pos: b.start, path: [b.start] }]]);
+  for (let t = 0; t < b.T; t++) {
+    const nxt = new Map<number, St>();
+    for (const { pos, path } of cur.values()) {
+      const occ = occAt(b, masks, t, pos);
+      for (let d = 0 as Dir; d <= 4; d++) {
+        const q = target(b, pos, d as Dir, occ);
+        if (q === null) continue;
+        if (q === b.exit) return [...path, q];
+        if (!nxt.has(q)) nxt.set(q, { pos: q, path: [...path, q] });
+      }
+    }
+    cur = nxt;
+  }
+  return null;
+}
+
+function nextWithPaths(b: Board, masks: number[], maxRuns: number): Map<string, { u: number[]; path: number[] }> {
+  const out = new Map<string, { u: number[]; path: number[] }>();
+  let cur = new Map<string, { pos: number; sig: number[]; path: number[] }>();
+  cur.set(`${b.start}|`, { pos: b.start, sig: [plateBitAt(b, b.start)], path: [b.start] });
+  for (let t = 0; t < b.T; t++) {
+    const nxt = new Map<string, { pos: number; sig: number[]; path: number[] }>();
+    for (const { pos, sig, path } of cur.values()) {
+      const occ = occAt(b, masks, t, pos);
+      for (let d = 0 as Dir; d <= 4; d++) {
+        const q = target(b, pos, d as Dir, occ);
+        if (q === null) continue;
+        const s2 = sig.concat(plateBitAt(b, q));
+        if (maxRuns < 99 && tooManyRuns(s2, maxRuns)) continue;
+        const key = `${q}|${s2.join(',')}`;
+        if (!nxt.has(key)) nxt.set(key, { pos: q, sig: s2, path: [...path, q] });
+      }
+    }
+    if (nxt.size > 200000) throw new TooBig();
+    cur = nxt;
+  }
+  for (const { sig, path } of cur.values()) {
+    const u = masks.map((m, t) => m | sig[t]);
+    const key = u.join(',');
+    if (!out.has(key)) out.set(key, { u, path });
+  }
+  return out;
+}
+
+export interface Hint {
+  /** 今のループでの動き（位置の列）。null = この先は解けない（またはヒントを出せない） */
+  path: number[] | null;
+  /** 今のループが最後になるか（true なら出口まで行く道） */
+  final: boolean;
+  /** 今のかげの状態から、あと何ループで出口に着けるか */
+  loopsLeft: number | null;
+}
+
+export function hintFrom(b: Board, ghosts: number[][], maxLoops = 4): Hint {
+  const base = ghostMasks(b, ghosts);
+  const direct = exitPath(b, base);
+  if (direct) return { path: direct, final: true, loopsLeft: 1 };
+  let mono = 7;
+  for (const c of b.cells) if (c >= '1' && c <= '3') mono &= ~(1 << (c.charCodeAt(0) - 49));
+  try {
+    for (const runs of [99, 2, 1]) {
+      let level = [...nextWithPaths(b, base, runs).values()].map((v) => ({ u: v.u, first: v.path }));
+      for (let loops = 2; loops <= maxLoops; loops++) {
+        for (const e of level) if (canExit(b, e.u)) return { path: e.first, final: false, loopsLeft: loops };
+        if (loops === maxLoops) break;
+        const next = new Map<string, { u: number[]; first: number[] }>();
+        for (const e of level) {
+          for (const [k, v] of nextMasks(b, e.u, 200000, runs)) if (!next.has(k)) next.set(k, { u: v, first: e.first });
+          if (next.size > 60000) throw new TooBig();
+        }
+        const kept = prune([...next.values()].map((e) => e.u), mono);
+        const keep = new Set(kept.map((u) => u.join(',')));
+        level = [...next.entries()].filter(([k]) => keep.has(k)).map(([, e]) => e);
+      }
+    }
+  } catch (e) {
+    if (!(e instanceof TooBig)) throw e;
+  }
+  return { path: null, final: false, loopsLeft: null };
+}
+
+/** 最少ループ数での答え。各ループの動き（位置の列）を順に返す（最後が出口まで行く道）。重い面は null。 */
+export function solveWithPaths(b: Board, maxLoops = 5, maxRuns = 99): number[][] | null {
+  let mono = 7;
+  for (const c of b.cells) if (c >= '1' && c <= '3') mono &= ~(1 << (c.charCodeAt(0) - 49));
+  type E = { u: number[]; ghosts: number[][] };
+  let level: E[] = [{ u: new Array<number>(b.T + 1).fill(0), ghosts: [] }];
+  for (let loops = 1; loops <= maxLoops; loops++) {
+    for (const e of level) {
+      const p = exitPath(b, e.u);
+      if (p) return [...e.ghosts, p];
+    }
+    if (loops === maxLoops) break;
+    const next = new Map<string, E>();
+    for (const e of level) {
+      for (const [k, v] of nextWithPaths(b, e.u, maxRuns)) if (!next.has(k)) next.set(k, { u: v.u, ghosts: [...e.ghosts, v.path] });
+      if (next.size > 60000) throw new TooBig();
+    }
+    const kept = prune([...next.values()].map((e) => e.u), mono);
+    const keep = new Set(kept.map((u) => u.join(',')));
+    level = [...next.entries()].filter(([k]) => keep.has(k)).map(([, e]) => e);
+  }
+  return null;
+}

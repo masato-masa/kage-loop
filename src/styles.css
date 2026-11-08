@@ -121,3 +121,9 @@ button:disabled { opacity: 0.38; cursor: default; }
 .row { display: flex; gap: 10px; }
 .row button, .primary { flex: 1; padding: 12px; border-radius: 14px; border: 2px solid var(--line); background: #2a2358; font-weight: 800; }
 .primary { background: linear-gradient(#ffc933, #ff9d00); border-color: #ffd479; color: #2a1a00; box-shadow: 0 3px 0 #a45f00; }
+
+.answer-btn { border-color: #ffd47988 !important; color: var(--gold); }
+.answer-line { filter: drop-shadow(0 0 3px #ffd479); animation: dash 1.2s linear infinite; }
+@keyframes dash { to { stroke-dashoffset: -0.5; } }
+.answer-bar { display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 13px; color: var(--gold); flex: none; }
+.answer-bar button { width: 36px; height: 32px; border-radius: 10px; border: 1px solid var(--line); background: #2a2358; font-size: 18px; }

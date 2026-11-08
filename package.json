@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "test": "vitest run",
     "audit": "npx tsx scripts/audit-levels.ts",
+    "solutions": "npx tsx scripts/make-solutions.ts",
     "deploy": "node scripts/deploy-pages.mjs"
   },
   "dependencies": {

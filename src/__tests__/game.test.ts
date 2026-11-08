@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { canExit, ghostMasks, parse, solve, verify } from '../game/engine';
 import { ALL_LEVELS } from '../game/levels';
 import { backLoop, commit, endLoop, newPlay, step, undo } from '../game/play';
+import solutions from '../game/solutions.json';
 
 const lv = (rows: string[], T = 8) => parse({ id: 't', name: 't', T, par: 0, rows });
 
@@ -78,4 +79,29 @@ describe('全面の検証', () => {
       expect(v.par, `${level.id}: 下限${v.lower} 上限${v.upper}`).toBe(level.par);
     }
   }, 300_000);
+});
+
+describe('こたえ（solutions.json）', () => {
+  it('どの面の答えも、実際の操作で再生して出口に着く', () => {
+    const sols = solutions as Record<string, number[][]>;
+    for (const level of ALL_LEVELS) {
+      const sol = sols[level.id];
+      expect(sol, `${level.id} の答えが無い（npx tsx scripts/make-solutions.ts）`).toBeTruthy();
+      expect(sol.length, level.id).toBe(level.par);
+      const b = parse(level);
+      let p = newPlay(b);
+      sol.forEach((path, li) => {
+        for (let t = 1; t < path.length; t++) {
+          const dx = (path[t] % b.w) - (path[t - 1] % b.w);
+          const dy = Math.floor(path[t] / b.w) - Math.floor(path[t - 1] / b.w);
+          const d = dx === 0 && dy === 0 ? 0 : dx === 1 ? 4 : dx === -1 ? 3 : dy === 1 ? 2 : 1;
+          const r = step(b, p, d as 0 | 1 | 2 | 3 | 4);
+          expect(r.kind, `${level.id} ループ${li + 1} の ${t} 手目`).toBe('ok');
+          if (r.kind === 'ok') p = r.play;
+        }
+        if (li < sol.length - 1) p = endLoop(p);
+      });
+      expect(p.won, `${level.id} が答えで解けない`).toBe(true);
+    }
+  }, 60_000);
 });

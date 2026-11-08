@@ -7,7 +7,7 @@ const GHOST_HUES = ['#bfe6ff', '#ffe0b0', '#c9f5cf'];
 // かげの絵は青白い。2 人目・3 人目は色相を回して見分ける。
 const GHOST_FILTER = ['none', 'hue-rotate(150deg) saturate(1.3)', 'hue-rotate(-60deg) saturate(1.2)'];
 
-export function BoardView({ b, p, shake }: { b: B; p: Play; shake: boolean }) {
+export function BoardView({ b, p, shake, answer }: { b: B; p: Play; shake: boolean; answer?: number[] | null }) {
   const t = Math.min(timeOf(p), b.T);
   const masks = ghostMasks(b, p.ghosts);
   const me = p.cur[p.cur.length - 1];
@@ -76,6 +76,7 @@ export function BoardView({ b, p, shake }: { b: B; p: Play; shake: boolean }) {
         {p.ghosts.map((g, gi) => (
           <polyline key={gi} points={trailPoints(g)} fill="none" stroke={GHOST_HUES[gi % 3]} strokeWidth="0.09" strokeDasharray="0.18 0.14" strokeLinecap="round" strokeLinejoin="round" opacity="0.55" />
         ))}
+        {answer && <polyline points={trailPoints(answer)} fill="none" stroke="#ffd479" strokeWidth="0.14" strokeDasharray="0.05 0.2" strokeLinecap="round" strokeLinejoin="round" className="answer-line" />}
         <polyline points={trailPoints(p.cur)} fill="none" stroke="#fff1c9" strokeWidth="0.11" strokeLinecap="round" strokeLinejoin="round" opacity="0.7" />
       </svg>
       {p.ghosts.map((g, gi) => (

@@ -5,6 +5,7 @@ import { ALL_LEVELS, WORLDS } from './game/levels';
 import { backLoop, endLoop, newPlay, type Play, resetLoop, starsFor, step, timeOf, undo } from './game/play';
 import { ghostMasks, plateBit } from './game/engine';
 import { IMG } from './ui/assets';
+import solutions from './game/solutions.json';
 import { BoardView } from './ui/Board';
 import { isMuted, setMuted, sfx } from './ui/sound';
 import { clearStars, loadStars, saveStar, type Stars } from './ui/storage';
@@ -105,6 +106,8 @@ function Game({ idx, stars, onBack, onStars, onNext }: { idx: number; stars: Sta
   const [p, setP] = useState<Play>(() => newPlay(b));
   const [shake, setShake] = useState(false);
   const [help, setHelp] = useState(false);
+  const [ans, setAns] = useState<number | null>(null);
+  const sol = (solutions as Record<string, number[][]>)[level.id] ?? null;
   const [toast, setToast] = useState('');
   const [, force] = useState(0);
   const pRef = useRef(p);
@@ -114,6 +117,7 @@ function Game({ idx, stars, onBack, onStars, onNext }: { idx: number; stars: Sta
 
   useEffect(() => {
     setP(newPlay(b));
+    setAns(null);
     savedRef.current = false;
   }, [b]);
 
@@ -240,7 +244,7 @@ function Game({ idx, stars, onBack, onStars, onNext }: { idx: number; stars: Sta
       </div>
 
       <div className="stage" onPointerDown={onDown} onPointerUp={onUp}>
-        <BoardView b={b} p={p} shake={shake} />
+        <BoardView b={b} p={p} shake={shake} answer={ans !== null && sol ? sol[ans] : null} />
         {toast && <div className="toast">{toast}</div>}
         {level.hint && p.loops === 1 && t === 0 && <div className="hint">{level.hint}</div>}
       </div>
@@ -277,7 +281,25 @@ function Game({ idx, stars, onBack, onStars, onNext }: { idx: number; stars: Sta
           前のループにもどる
         </button>
         <button onClick={() => setP(newPlay(b))}>最初から</button>
+        {sol && (
+          <button className="answer-btn" onClick={() => setAns(ans === null ? 0 : null)}>
+            {ans === null ? 'こたえをみる' : 'こたえをとじる'}
+          </button>
+        )}
       </div>
+      {ans !== null && sol && (
+        <div className="answer-bar">
+          <button disabled={ans === 0} onClick={() => setAns(ans - 1)}>
+            ‹
+          </button>
+          <span>
+            こたえ {ans + 1} / {sol.length} ループ目{ans === sol.length - 1 ? '（出口へ）' : '（かげになる動き）'}
+          </span>
+          <button disabled={ans === sol.length - 1} onClick={() => setAns(ans + 1)}>
+            ›
+          </button>
+        </div>
+      )}
 
       {p.won && (
         <div className="modal win">
