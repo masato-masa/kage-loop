@@ -15,3 +15,5 @@
 - 素材は ChatGPT 製: `refs/gen/{props,chars}.png`（git 管理外・元データは game-assets）→ `node scripts/slice-gen.mjs` → `src/assets/gen/`。
   かげの色違いは CSS の hue-rotate。逆の扉の縞は CSS（`.inv-mark`）。
 - 効果音は WebAudio で合成（`src/ui/sound.ts`）。
+- **こたえ**: `npm run solutions`（`scripts/make-solutions.ts`）が各面の最少ループの動きを `src/game/solutions.json` に書く。面を足したら audit → solutions の順に走らせる。
+  テストが答えを実際の操作で再生して出口に着くか確かめる（面を直して答えが古くなると落ちる）。
