@@ -82,7 +82,7 @@ button:disabled { opacity: 0.5; cursor: default; }
 .stage[data-l='1'] { -webkit-mask-image: linear-gradient(90deg, transparent, #000 28px); mask-image: linear-gradient(90deg, transparent, #000 28px); }
 .stage[data-l='1'][data-r='1'] { -webkit-mask-image: linear-gradient(90deg, transparent, #000 28px, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, transparent, #000 28px, #000 calc(100% - 28px), transparent); }
 .stage > .board { margin: 0 auto; flex: none; }
-.board { position: relative; width: max(min(92vw, 496px, calc((100dvh - 330px) * var(--ratio, 1.4))), calc(var(--w) * 42px)); min-width: 0; max-height: 100%; background: var(--wall); border-radius: 18px; padding: 0; overflow: hidden; box-shadow: 0 0 0 3px #4a3f94, 0 12px 28px #000a, inset 0 0 40px #0008; }
+.board { position: relative; width: max(min(92vw, 496px, calc((100dvh - 330px) * var(--ratio, 1.4))), calc(var(--w) * max(36px, min(42px, (100vw - 24px) / var(--w))))); min-width: 0; max-height: 100%; background: var(--wall); border-radius: 18px; padding: 0; overflow: hidden; box-shadow: 0 0 0 3px #4a3f94, 0 12px 28px #000a, inset 0 0 40px #0008; }
 .board.shake { animation: shake 0.28s; }
 @keyframes shake { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
 .cell { position: absolute; }
