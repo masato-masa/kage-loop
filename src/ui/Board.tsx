@@ -7,6 +7,26 @@ const GHOST_HUES = ['#bfe6ff', '#ffe0b0', '#c9f5cf'];
 // かげの絵は青白い。2 人目・3 人目は色相を回して見分ける。
 const GHOST_FILTER = ['none', 'hue-rotate(150deg) saturate(1.3)', 'hue-rotate(-60deg) saturate(1.2)'];
 
+// 盤が画面より広いときの全体図。いま見えている範囲を枠で示す。
+export function Minimap({ b, p, t, vp }: { b: B; p: Play; t: number; vp: { l: number; w: number } }) {
+  const S = 8;
+  const at = (i: number) => ({ left: (i % b.w) * S, top: Math.floor(i / b.w) * S, width: S, height: S });
+  const me = p.cur[p.cur.length - 1];
+  return (
+    <div className="minimap" aria-hidden>
+      <div className="mm" style={{ width: b.w * S, height: b.h * S }}>
+        {b.cells.map((c, i) => (c === '#' ? <i key={i} className="w" style={at(i)} /> : <i key={i} className="f" style={at(i)} />))}
+        <i className="e" style={at(b.exit)} />
+        {p.ghosts.map((g, gi) => (
+          <i key={gi} className="gh" style={at(ghostAt(g, t))} />
+        ))}
+        <i className="me" style={at(me)} />
+        <i className="vp" style={{ left: vp.l * b.w * S, width: vp.w * b.w * S, top: 0, height: b.h * S }} />
+      </div>
+    </div>
+  );
+}
+
 export function BoardView({ b, p, shake, answer }: { b: B; p: Play; shake: boolean; answer?: number[] | null }) {
   const t = Math.min(timeOf(p), b.T);
   const masks = ghostMasks(b, p.ghosts);

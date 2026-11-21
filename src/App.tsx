@@ -6,7 +6,7 @@ import { backLoop, endLoop, newPlay, type Play, resetLoop, starsFor, step, timeO
 import { ghostMasks, plateBit } from './game/engine';
 import { IMG } from './ui/assets';
 import solutions from './game/solutions.json';
-import { BoardView } from './ui/Board';
+import { BoardView, Minimap } from './ui/Board';
 import { isMuted, setMuted, sfx, startBgm, stopBgm } from './ui/sound';
 import { clearStars, hasSeen, loadLast, loadStars, markSeen, saveLast, saveStar, type Stars } from './ui/storage';
 
@@ -280,11 +280,13 @@ function Game({ idx, onBack, onStars, onNext }: { idx: number; onBack: () => voi
     el.scrollTo({ left: (meX + 0.5) * cell - el.clientWidth / 2, behavior: 'smooth' });
   }, [meX, b.w, p.loops]);
 
-  // 盤が見切れている側を縁のぼかしで知らせる
+  // 盤が見切れている側を縁のぼかしで知らせ、ミニマップの窓を動かす
+  const [vp, setVp] = useState<{ l: number; w: number } | null>(null);
   useEffect(() => {
     const el = stageRef.current;
     if (!el) return;
     const upd = () => {
+      setVp(el.scrollWidth > el.clientWidth + 4 ? { l: el.scrollLeft / el.scrollWidth, w: el.clientWidth / el.scrollWidth } : null);
       el.dataset.l = el.scrollLeft > 4 ? '1' : '';
       el.dataset.r = el.scrollLeft + el.clientWidth < el.scrollWidth - 4 ? '1' : '';
     };
@@ -375,6 +377,7 @@ function Game({ idx, onBack, onStars, onNext }: { idx: number; onBack: () => voi
         <div className="stage" ref={stageRef} onPointerDown={onDown} onPointerUp={onUp}>
           <BoardView b={b} p={p} shake={shake} answer={ans !== null && sol ? sol[ans] : null} />
         </div>
+        {vp && <Minimap b={b} p={p} t={t} vp={vp} />}
         {flash > 0 && <div key={flash} className="record-flash" />}
         {toast && <div className="toast">{toast}</div>}
         {level.hint && p.loops === 1 && t === 0 && <div className="hint">{level.hint}</div>}
