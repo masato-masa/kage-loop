@@ -68,11 +68,11 @@ button:disabled { opacity: 0.5; cursor: default; }
 .title b { color: var(--gold); margin-right: 4px; }
 .round { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--line); background: #2a2358; font-size: 18px; font-weight: 800; display: grid; place-content: center; padding: 0; }
 .status { display: flex; gap: 8px; align-items: center; justify-content: center; min-height: 34px; }
-.pill { background: #1f1948; border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+.pill { white-space: nowrap; min-width: 0; background: #1f1948; border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
 .pill b { color: var(--gold); font-size: 15px; }
 .par { color: var(--sub); font-size: 12px; }
-.pips { display: inline-flex; gap: 2px; }
-.pips i { width: 6px; height: 12px; border-radius: 3px; background: #4a4278; display: block; }
+.pips { display: inline-flex; gap: 2px; min-width: 0; }
+.pips i { flex: 0 1 6px; min-width: 2px; width: 6px; height: 12px; border-radius: 3px; background: #4a4278; display: block; }
 .pips i.used { background: var(--gold); }
 
 .stage-wrap { flex: 1 1 0; min-height: 0; position: relative; display: flex; flex-direction: column; }
@@ -82,7 +82,7 @@ button:disabled { opacity: 0.5; cursor: default; }
 .stage[data-l='1'] { -webkit-mask-image: linear-gradient(90deg, transparent, #000 28px); mask-image: linear-gradient(90deg, transparent, #000 28px); }
 .stage[data-l='1'][data-r='1'] { -webkit-mask-image: linear-gradient(90deg, transparent, #000 28px, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, transparent, #000 28px, #000 calc(100% - 28px), transparent); }
 .stage > .board { margin: 0 auto; flex: none; }
-.board { position: relative; width: max(min(92vw, 496px, calc((100dvh - 330px) * var(--ratio, 1.4))), calc(var(--w) * max(36px, min(42px, (100vw - 24px) / var(--w))))); min-width: 0; max-height: 100%; background: var(--wall); border-radius: 18px; padding: 0; overflow: hidden; box-shadow: 0 0 0 3px #4a3f94, 0 12px 28px #000a, inset 0 0 40px #0008; }
+.board { position: relative; width: min(92vw, 496px, calc((100dvh - 330px) * var(--ratio, 1.4))); min-width: 0; max-height: 100%; background: var(--wall); border-radius: 18px; padding: 0; overflow: hidden; box-shadow: 0 0 0 3px #4a3f94, 0 12px 28px #000a, inset 0 0 40px #0008; }
 .board.shake { animation: shake 0.28s; }
 @keyframes shake { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
 .cell { position: absolute; }
