@@ -164,3 +164,16 @@ button:disabled { opacity: 0.5; cursor: default; }
 @keyframes fall { to { transform: translateY(110vh) rotate(calc(var(--r) + 540deg)); opacity: 0.9; } }
 .record-flash { position: absolute; inset: 8px 0; border-radius: 22px; pointer-events: none; z-index: 15; background: radial-gradient(circle, #bfe6ffcc, transparent 70%); animation: rec 0.6s ease-out forwards; }
 @keyframes rec { from { opacity: 1; transform: scale(0.7); } to { opacity: 0; transform: scale(1.25); } }
+
+/* ---------- 横向き（高さが低い画面）: 盤を左、操作を右に置く ---------- */
+@media (orientation: landscape) and (max-height: 520px) {
+  .play { max-width: none; display: grid; grid-template-columns: minmax(0, 1fr) minmax(250px, 40%); grid-template-rows: auto auto minmax(0, 1fr) auto; column-gap: 12px; row-gap: 6px; padding: 6px 16px calc(6px + env(safe-area-inset-bottom)); }
+  .play > .bar, .play > .status { grid-column: 1 / -1; }
+  .play > .stage-wrap { grid-column: 1; grid-row: 3 / 5; }
+  .play > .pad { grid-column: 2; grid-row: 3; align-self: center; width: 100%; }
+  .play > .actions { grid-column: 2; grid-row: 4; }
+  .play > .answer-bar { grid-column: 2; }
+  .board { width: max(min(100%, calc((100dvh - 120px) * var(--ratio, 1.4))), calc(var(--w) * 38px)); }
+  .minimap { top: 0; }
+  .actions button { font-size: 12px; padding: 2px 2px; white-space: nowrap; }
+}
