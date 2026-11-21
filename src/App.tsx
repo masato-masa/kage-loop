@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import { type Dir, parse } from './game/engine';
 import { ALL_LEVELS, WORLDS } from './game/levels';
@@ -272,14 +272,16 @@ function Game({ idx, onBack, onStars, onNext }: { idx: number; onBack: () => voi
 
   // 横長の盤は、主人公が真ん中に来るように横スクロールで追う
   const meX = p.cur[p.cur.length - 1] % b.w;
-  useEffect(() => {
+  // 描画の前にスクロールを合わせる（useEffect だと、主人公が先に動いて 1 フレームだけ画面外になる）
+  useLayoutEffect(() => {
     const el = stageRef.current;
     const board = el?.querySelector<HTMLElement>('.board');
     if (!el || !board || board.offsetWidth <= el.clientWidth) return;
     const cell = board.offsetWidth / b.w;
     const target = Math.max(0, Math.min(el.scrollWidth - el.clientWidth, (meX + 0.5) * cell - el.clientWidth / 2));
     // ループの頭に戻るような大きなジャンプは即座に。それ以外は毎フレーム近づける（連打しても遅れない）
-    if (Math.abs(target - el.scrollLeft) > cell * 3) {
+    const heroX = (meX + 0.5) * cell - el.scrollLeft;
+    if (Math.abs(target - el.scrollLeft) > cell * 3 || heroX < cell * 0.75 || heroX > el.clientWidth - cell * 0.75) {
       el.scrollLeft = target;
       return;
     }
