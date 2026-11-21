@@ -27,3 +27,4 @@ assets-src/
 
 refs/
 .gh-pages
+.playwright-cli/
