@@ -277,9 +277,24 @@ function Game({ idx, onBack, onStars, onNext }: { idx: number; onBack: () => voi
     const board = el?.querySelector<HTMLElement>('.board');
     if (!el || !board || board.offsetWidth <= el.clientWidth) return;
     const cell = board.offsetWidth / b.w;
-    const left = (meX + 0.5) * cell - el.clientWidth / 2;
-    // 1〜2 マスの追従はなめらかに、ループの頭に戻るような大きなジャンプは即座に
-    el.scrollTo({ left, behavior: Math.abs(left - el.scrollLeft) > cell * 3 ? 'auto' : 'smooth' });
+    const target = Math.max(0, Math.min(el.scrollWidth - el.clientWidth, (meX + 0.5) * cell - el.clientWidth / 2));
+    // ループの頭に戻るような大きなジャンプは即座に。それ以外は毎フレーム近づける（連打しても遅れない）
+    if (Math.abs(target - el.scrollLeft) > cell * 3) {
+      el.scrollLeft = target;
+      return;
+    }
+    let raf = 0;
+    const tick = () => {
+      const d = target - el.scrollLeft;
+      if (Math.abs(d) < 0.5) {
+        el.scrollLeft = target;
+        return;
+      }
+      el.scrollLeft += d * 0.3;
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
   }, [meX, b.w, p.loops]);
 
   // 盤が見切れている側を縁のぼかしで知らせ、ミニマップの窓を動かす
