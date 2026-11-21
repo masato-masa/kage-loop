@@ -277,7 +277,9 @@ function Game({ idx, onBack, onStars, onNext }: { idx: number; onBack: () => voi
     const board = el?.querySelector<HTMLElement>('.board');
     if (!el || !board || board.offsetWidth <= el.clientWidth) return;
     const cell = board.offsetWidth / b.w;
-    el.scrollTo({ left: (meX + 0.5) * cell - el.clientWidth / 2, behavior: 'smooth' });
+    const left = (meX + 0.5) * cell - el.clientWidth / 2;
+    // 1〜2 マスの追従はなめらかに、ループの頭に戻るような大きなジャンプは即座に
+    el.scrollTo({ left, behavior: Math.abs(left - el.scrollLeft) > cell * 3 ? 'auto' : 'smooth' });
   }, [meX, b.w, p.loops]);
 
   // 盤が見切れている側を縁のぼかしで知らせ、ミニマップの窓を動かす
