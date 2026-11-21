@@ -148,7 +148,7 @@ button:disabled { opacity: 0.5; cursor: default; }
 .answer-line { filter: drop-shadow(0 0 3px #ffd479); animation: dash 1.2s linear infinite; }
 @keyframes dash { to { stroke-dashoffset: -0.5; } }
 .answer-bar { display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 13px; color: var(--gold); flex: none; }
-.answer-bar button { width: 36px; height: 32px; border-radius: 10px; border: 1px solid var(--line); background: #2a2358; font-size: 18px; }
+.answer-bar button { width: 44px; height: 44px; border-radius: 10px; border: 1px solid var(--line); background: #2a2358; font-size: 18px; }
 
 .confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 51; }
 .confetti i { position: absolute; top: -20px; left: var(--x); width: 9px; height: 14px; background: var(--c); border-radius: 2px; transform: rotate(var(--r)); animation: fall 2.4s ease-in var(--d) both; }
