@@ -1,0 +1,30 @@
+- generic [ref=f4e3]:
+  - banner [ref=f4e4]:
+    - button "もどる" [ref=f4e5] [cursor=pointer]: ‹
+    - generic [ref=f4e6]: 9-1 ゆきどまり
+    - button "音" [ref=f4e7] [cursor=pointer]: 🔇
+    - button "あそびかた" [ref=f4e8] [cursor=pointer]: "?"
+  - generic [ref=f4e9]:
+    - generic [ref=f4e10]:
+      - text: ループ
+      - generic [ref=f4e11]: "1"
+      - text: /
+      - generic [ref=f4e12]: めやす 4
+    - generic [ref=f4e13]:
+      - text: のこり
+      - generic [ref=f4e25]: "10"
+  - generic [ref=f4e26]: しましまの扉の奥のスイッチに乗ったかげは、そこから出られない。そのまま立ち続けて、扉を開けておく。
+  - generic [ref=f4e93]:
+    - button "上" [ref=f4e94] [cursor=pointer]: ▲
+    - button "左" [ref=f4e95] [cursor=pointer]: ◀
+    - button "待つ" [ref=f4e96] [cursor=pointer]
+    - button "右" [ref=f4e97] [cursor=pointer]: ▶
+    - button "3手待つ" [ref=f4e98] [cursor=pointer]
+    - button "下" [ref=f4e99] [cursor=pointer]: ▼
+  - generic [ref=f4e100]:
+    - button "1手もどす" [disabled] [ref=f4e101]
+    - button "このループをやりなおす" [disabled] [ref=f4e102]
+    - button "ここでかげにする" [disabled] [ref=f4e103]
+    - button "前のループにもどる" [disabled] [ref=f4e104]
+    - button "最初から" [ref=f4e105] [cursor=pointer]
+    - button "こたえをみる" [ref=f4e106] [cursor=pointer]

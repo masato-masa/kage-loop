@@ -1,0 +1,12 @@
+- generic [ref=f2e3]:
+  - generic [ref=f2e4]: "[plugin:vite:oxc] Transform failed with 1 error: [PARSE_ERROR] Unexpected token ╭─[ src/App.tsx:305:4 ] │ 305 │ }, [p.won, p.loops, level, onStars]); │ ┬ │ ╰── ─────╯"
+  - generic [ref=f2e5]: C:/claude/dev/games/kage-loop/src/App.tsx
+  - generic [ref=f2e6]: at transformWithOxc (file:///C:/claude/dev/games/kage-loop/node_modules/vite/dist/node/chunks/node.js:7669:19) at TransformPluginContext.transform (file:///C:/claude/dev/games/kage-loop/node_modules/vite/dist/node/chunks/node.js:7743:26) at EnvironmentPluginContainer.transform (file:///C:/claude/dev/games/kage-loop/node_modules/vite/dist/node/chunks/node.js:8632:51) at async loadAndTransform (file:///C:/claude/dev/games/kage-loop/node_modules/vite/dist/node/chunks/node.js:20108:26) at async viteTransformMiddleware (file:///C:/claude/dev/games/kage-loop/node_modules/vite/dist/node/chunks/node.js:20328:20)
+  - generic [ref=f2e7]:
+    - text: Click outside, press Esc key, or fix the code to dismiss.You can also disable this overlay by setting
+    - code [ref=f2e8]: server.hmr.overlay
+    - text: to
+    - code [ref=f2e9]: "false"
+    - text: in
+    - code [ref=f2e10]: vite.config.ts
+    - text: .

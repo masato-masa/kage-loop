@@ -280,6 +280,23 @@ function Game({ idx, onBack, onStars, onNext }: { idx: number; onBack: () => voi
     el.scrollTo({ left: (meX + 0.5) * cell - el.clientWidth / 2, behavior: 'smooth' });
   }, [meX, b.w, p.loops]);
 
+  // 盤が見切れている側を縁のぼかしで知らせる
+  useEffect(() => {
+    const el = stageRef.current;
+    if (!el) return;
+    const upd = () => {
+      el.dataset.l = el.scrollLeft > 4 ? '1' : '';
+      el.dataset.r = el.scrollLeft + el.clientWidth < el.scrollWidth - 4 ? '1' : '';
+    };
+    upd();
+    el.addEventListener('scroll', upd, { passive: true });
+    window.addEventListener('resize', upd);
+    return () => {
+      el.removeEventListener('scroll', upd);
+      window.removeEventListener('resize', upd);
+    };
+  }, [b.w, level.id]);
+
   // クリアしたら記録
   useEffect(() => {
     if (p.won && !savedRef.current) {
@@ -389,13 +406,13 @@ function Game({ idx, onBack, onStars, onNext }: { idx: number; onBack: () => voi
           1手もどす
         </button>
         <button onClick={() => setP((c) => resetLoop(c))} disabled={t === 0}>
-          このループをやりなおす
+          やり直す
         </button>
         <button onClick={() => (sfx.record(), setP(endLoop(pRef.current)))} disabled={t === 0}>
-          ここでかげにする
+          かげにする
         </button>
         <button onClick={() => setP((c) => backLoop(c))} disabled={p.ghosts.length === 0}>
-          前のループにもどる
+          前のループへ
         </button>
         <button onClick={() => setP(newPlay(b))}>最初から</button>
         {sol && (
