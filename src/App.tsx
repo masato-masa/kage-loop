@@ -42,9 +42,14 @@ function Home({ stars, onPlay }: { stars: Stars; onPlay: (i: number) => void }) 
   useEffect(() => {
     if (nextIdx > 2) document.querySelector('.lv.next')?.scrollIntoView({ block: 'center' });
   }, [nextIdx]);
+  const [settings, setSettings] = useState(false);
   let idx = 0;
   return (
     <div className="home">
+      <button className="round home-gear" onClick={() => setSettings(true)} aria-label="設定">
+        ⚙
+      </button>
+      {settings && <Settings onClose={() => setSettings(false)} />}
       <div className="home-hero">
         <div className="home-chars" aria-hidden>
           <img className="hc hc-hero" src={IMG.hero} alt="" draggable={false} />
@@ -100,17 +105,45 @@ function Home({ stars, onPlay }: { stars: Stars; onPlay: (i: number) => void }) 
       <p className="count">
         ★ {got} / {total * 3}
       </p>
-      <button
-        className="reset"
-        onClick={() => {
-          if (confirm('きろくをぜんぶ消しますか？')) {
-            clearStars();
-            location.reload();
-          }
-        }}
-      >
-        テスト用（きろくをけす）
-      </button>
+    </div>
+  );
+}
+
+/** ホームの設定（ほかのパズルと同じ、右上の歯車から）。音と、記録の削除（テスト用）をここに置く。 */
+function Settings({ onClose }: { onClose: () => void }) {
+  const [, force] = useState(0);
+  return (
+    <div className="modal" onClick={onClose}>
+      <div className="sheet" onClick={(e) => e.stopPropagation()}>
+        <h3>設定</h3>
+        <div className="sheet-row">
+          <span>効果音・BGM</span>
+          <button
+            className="switch"
+            role="switch"
+            aria-checked={!isMuted()}
+            aria-label="音の入切"
+            onClick={() => {
+              setMuted(!isMuted());
+              force((n) => n + 1);
+            }}
+          />
+        </div>
+        <button
+          className="sheet-row danger"
+          onClick={() => {
+            if (confirm('きろくをぜんぶ消しますか？')) {
+              clearStars();
+              location.reload();
+            }
+          }}
+        >
+          テスト用（きろくを ぜんぶ けす）
+        </button>
+        <button className="primary" onClick={onClose}>
+          とじる
+        </button>
+      </div>
     </div>
   );
 }
