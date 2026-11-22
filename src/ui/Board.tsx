@@ -54,6 +54,12 @@ export function BoardView({ b, p, shake, answer }: { b: B; p: Play; shake: boole
         </div>
       );
     }
+    if (c === 'w')
+      return (
+        <div key={i} className="cell floor warp" style={style}>
+          <span className="warp-swirl" />
+        </div>
+      );
     if ((c >= 'A' && c <= 'C') || (c >= '1' && c <= '3')) {
       const inv = c >= '1' && c <= '3';
       const k = inv ? c.charCodeAt(0) - 49 : c.charCodeAt(0) - 65;

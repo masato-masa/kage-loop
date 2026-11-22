@@ -215,6 +215,34 @@ function InvIntro({ onClose }: { onClose: () => void }) {
   );
 }
 
+/** ワープ床の初見説明（その床が初めて出る面で 1 度だけ） */
+function WarpIntro({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="modal" onClick={onClose}>
+      <div className="sheet" onClick={(e) => e.stopPropagation()}>
+        <h3>ワープの渦</h3>
+        <div className="inv-demo" aria-hidden>
+          <div className="inv-pair">
+            <div className="inv-cell">
+              <span className="warp-swirl" />
+              <small>入る</small>
+            </div>
+            <span>→</span>
+            <div className="inv-cell">
+              <span className="warp-swirl" />
+              <small>もう片方へ</small>
+            </div>
+          </div>
+        </div>
+        <p>渦に入ると、同じ手の中でもう片方の渦に出る。<b>かげも同じ</b>に動く。</p>
+        <button className="primary" onClick={onClose}>
+          わかった
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function Game({ idx, onBack, onStars, onNext }: { idx: number; onBack: () => void; onStars: (s: Stars) => void; onNext: () => void }) {
   const level = ALL_LEVELS[idx];
   const b = useMemo(() => parse(level), [level]);
@@ -223,6 +251,8 @@ function Game({ idx, onBack, onStars, onNext }: { idx: number; onBack: () => voi
   const [help, setHelp] = useState(false);
   const hasInv = level.rows.some((r) => /[123]/.test(r));
   const [invIntro, setInvIntro] = useState(() => hasInv && !hasSeen('inv'));
+  const hasWarp = level.rows.some((r) => r.includes('w'));
+  const [warpIntro, setWarpIntro] = useState(() => hasWarp && !hasSeen('warp'));
   const [ans, setAns] = useState<number | null>(null);
   const sol = (solutions as Record<string, number[][]>)[level.id] ?? null;
   const [toast, setToast] = useState('');
@@ -536,6 +566,14 @@ function Game({ idx, onBack, onStars, onNext }: { idx: number; onBack: () => voi
         </div>
       )}
       {help && <Help onClose={() => setHelp(false)} />}
+      {warpIntro && !help && !invIntro && (
+        <WarpIntro
+          onClose={() => {
+            markSeen('warp');
+            setWarpIntro(false);
+          }}
+        />
+      )}
       {invIntro && !help && (
         <InvIntro
           onClose={() => {

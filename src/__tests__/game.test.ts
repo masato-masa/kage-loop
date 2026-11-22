@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { canExit, ghostMasks, parse, solve, verify } from '../game/engine';
+import { canExit, ghostMasks, occAt, parse, solve, target, verify } from '../game/engine';
 import { ALL_LEVELS } from '../game/levels';
 import { backLoop, commit, endLoop, newPlay, step, undo } from '../game/play';
 import solutions from '../game/solutions.json';
@@ -92,9 +92,9 @@ describe('こたえ（solutions.json）', () => {
       let p = newPlay(b);
       sol.forEach((path, li) => {
         for (let t = 1; t < path.length; t++) {
-          const dx = (path[t] % b.w) - (path[t - 1] % b.w);
-          const dy = Math.floor(path[t] / b.w) - Math.floor(path[t - 1] / b.w);
-          const d = dx === 0 && dy === 0 ? 0 : dx === 1 ? 4 : dx === -1 ? 3 : dy === 1 ? 2 : 1;
+          // ワープ床があると位置が隣のマスとは限らないので、動く先が一致する向きを探す
+          const occ = occAt(b, ghostMasks(b, p.ghosts), t - 1, path[t - 1]);
+          const d = ([0, 1, 2, 3, 4] as const).find((dd) => target(b, path[t - 1], dd, occ) === path[t]) ?? 0;
           const r = step(b, p, d as 0 | 1 | 2 | 3 | 4);
           expect(r.kind, `${level.id} ループ${li + 1} の ${t} 手目`).toBe('ok');
           if (r.kind === 'ok') p = r.play;

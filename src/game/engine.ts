@@ -6,6 +6,8 @@
 // - 床のスイッチ（a b c）に誰か（自分・かげ）が乗っている間だけ、同じ名前の扉（A B C）が開く。
 // - 逆の扉（1 2 3 = スイッチ a b c と対）は、そのスイッチが空いている間だけ開く。
 // - かげは自分にも他のかげにも当たらない（すり抜ける）。扉と壁は自分だけをふさぐ（かげは記録どおりに歩く）。
+// - ワープ床（w が盤に 2 つ）は対になっている。一方に入った手で、もう一方のマスへ移る（同じ手の中で）。
+//   かげは記録どおりに歩くので、ワープした先のマスにいる。出た後は普通のマスで、また入れば移る。
 // - 出口（E）に着いたらクリア。使ったループ数が少ないほど星が多い。
 
 export type Dir = 0 | 1 | 2 | 3 | 4; // 待つ・上・下・左・右
@@ -28,11 +30,13 @@ export interface Level {
 export interface Board {
   w: number;
   h: number;
-  /** '#' 壁 / '.' 床 / 'a'.. スイッチ / 'A'.. 扉 / 'E' 出口（S は床にして start へ） */
+  /** '#' 壁 / '.' 床 / 'a'.. スイッチ / 'A'.. 扉 / 'w' ワープ床 / 'E' 出口（S は床にして start へ） */
   cells: string[];
   start: number;
   exit: number;
   T: number;
+  /** ワープ床の対。warp[i] = 対のマスの index（ワープ床でなければ -1） */
+  warp: number[];
 }
 
 export function parse(level: Level): Board {
@@ -56,7 +60,15 @@ export function parse(level: Level): Board {
     }
   }
   if (start < 0 || exit < 0) throw new Error(`${level.id}: S か E が無い`);
-  return { w, h, cells, start, exit, T: level.T };
+  const warp = new Array<number>(cells.length).fill(-1);
+  const ws = cells.map((c, i) => (c === 'w' ? i : -1)).filter((i) => i >= 0);
+  if (ws.length !== 0 && ws.length !== 2) throw new Error(`${level.id}: ワープ床 w は 0 か 2 つ（${ws.length}）`);
+  if (ws.length === 2) {
+    if (ws.includes(start)) throw new Error(`${level.id}: 入口をワープ床にできない`);
+    warp[ws[0]!] = ws[1]!;
+    warp[ws[1]!] = ws[0]!;
+  }
+  return { w, h, cells, start, exit, T: level.T, warp };
 }
 
 const isPlate = (c: string) => c >= 'a' && c <= 'c';
@@ -82,7 +94,7 @@ export function target(b: Board, pos: number, dir: Dir, occ: number): number | n
   const c = b.cells[to];
   if (c === '#') return null;
   if (!doorOpen(c, occ)) return null;
-  return to;
+  return b.warp[to]! >= 0 ? b.warp[to]! : to;
 }
 
 /** かげ全員の「時刻 t にスイッチを踏んでいる集合」を重ねたもの。長さ T+1。 */

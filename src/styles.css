@@ -189,3 +189,9 @@ button:disabled { opacity: 0.5; cursor: default; }
 .switch[aria-checked='true'] { background: var(--gold); }
 .switch[aria-checked='true']::after { transform: translateX(22px); }
 .switch::before { content: ''; position: absolute; inset: -8px -4px; }
+
+/* ワープの渦（絵はコード製。ChatGPT 待ち） */
+.warp-swirl { display: block; width: 72%; height: 72%; border-radius: 50%; background: conic-gradient(from 0deg, #b58cff, #5a3fd0, #b58cff, #5a3fd0, #b58cff); box-shadow: 0 0 10px #b58cff, inset 0 0 8px #1a0f4a; animation: warp-spin 2.4s linear infinite; }
+.cell.warp { display: grid; place-items: center; }
+.inv-cell .warp-swirl { width: 40px; height: 40px; }
+@keyframes warp-spin { to { transform: rotate(360deg); } }
