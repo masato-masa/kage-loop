@@ -42,7 +42,7 @@ function out(c: AudioContext): AudioNode {
   comp.attack.value = 0.004;
   comp.release.value = 0.18;
   master = c.createGain();
-  master.gain.value = 3.2;
+  master.gain.value = 4.2;
   master.connect(comp).connect(c.destination);
   masterCtx = c;
   return master;
