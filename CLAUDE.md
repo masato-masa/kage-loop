@@ -11,6 +11,7 @@
   ソルバーは「かげの組み合わせ = スイッチ占有の列（時刻ごとのビット）」で状態を畳み、通常の扉だけのスイッチは下位互換を捨てる（`prune`）。
 - 面の探索: `npx tsx scripts/gen-levels.ts <幅> <高さ> <T> <目標ループ> <秒> [逆の扉の数]`。全扉・全スイッチが必要な盤だけを出す。
   逆の扉入りは状態が多く遅い（T=10 で数秒〜）。1 度に 1〜2 本まで（メモリ）。
+- 既存の par 4 の盤をいじって探す: `npx tsx scripts/mutate-levels.ts <秒> [シード]`。2026-11-22 に試して出た 15 件は、床 1 枚を足しただけなど見かけだけの違いで、新しい par 4 の配置は出なかった（ワールド 10 は作れず）。
 - 確認用 URL: `?mute`（消音）、`?all`（全面を開く）、`?lv=3-2`（その面から）。
 - 素材は ChatGPT 製: `refs/gen/{props,chars}.png`（git 管理外・元データは game-assets）→ `node scripts/slice-gen.mjs` → `src/assets/gen/`。
   かげの色違いは CSS の hue-rotate。逆の扉の縞は CSS（`.inv-mark`）。

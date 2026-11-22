@@ -36,13 +36,13 @@ let masterCtx: AudioContext | null = null;
 function out(c: AudioContext): AudioNode {
   if (master && masterCtx === c) return master;
   const comp = c.createDynamicsCompressor();
-  comp.threshold.value = -18;
+  comp.threshold.value = -10;
   comp.knee.value = 24;
   comp.ratio.value = 6;
   comp.attack.value = 0.004;
   comp.release.value = 0.18;
   master = c.createGain();
-  master.gain.value = 0.9;
+  master.gain.value = 3.2;
   master.connect(comp).connect(c.destination);
   masterCtx = c;
   return master;
