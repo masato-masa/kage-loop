@@ -32,7 +32,7 @@ button:disabled { opacity: 0.5; cursor: default; }
 .hc-hero { left: 14px; height: 140px; filter: drop-shadow(0 6px 4px #0008); animation: bob 3s ease-in-out infinite; }
 .hc-ghost { left: 96px; height: 120px; opacity: 0.7; animation: bob 3s ease-in-out -1.2s infinite; }
 .hc-exit { right: 0; height: 88px; filter: drop-shadow(0 0 16px #ffcf6a); animation: glow 2s ease-in-out infinite; }
-.tag { color: var(--sub); margin: 8px 0 0; }
+.tag { color: #e4dcff; margin: 8px 0 0; text-shadow: 0 1px 6px #000, 0 0 2px #000; }
 .world { margin-top: 26px; }
 .world h2 { margin: 0 0 10px; font-size: 15px; }
 .world-head { width: 100%; display: flex; justify-content: space-between; align-items: center; min-height: 44px; padding: 0 4px; background: none; border: 0; border-bottom: 1px solid #ffffff1c; color: var(--sub); font-size: 15px; font-weight: 700; letter-spacing: 3px; text-align: left; }
@@ -96,9 +96,9 @@ button:disabled { opacity: 0.5; cursor: default; }
 .board.shake { animation: shake 0.28s; }
 @keyframes shake { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
 .cell { position: absolute; }
-.cell.wall { background: linear-gradient(#2a2358, #1a1540); box-shadow: inset 0 0 0 2px #0006, inset 0 3px 0 #ffffff12; border-radius: 6px; }
+/* 壁は 1 マスずつ飾らず、盤の地（--wall）と同じ平らな 1 色にする。壁が 1 つの塊に見え、床だけが浮いて読める。 */
+.cell.wall { background: var(--wall); }
 .cell.floor { background: var(--floor); box-shadow: inset 0 0 0 1px #00000026; }
-.cell.floor::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, #ffffff10, transparent 55%); }
 .cell.start { background: #4a3f86; }
 .cell.start::before { content: ''; position: absolute; inset: 24%; border: 2px dashed #ffffff55; border-radius: 50%; }
 
@@ -131,12 +131,13 @@ button:disabled { opacity: 0.5; cursor: default; }
 .pad { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 54px); gap: 8px; width: min(100%, 300px); margin: 0 auto; flex: none; }
 .pad button { border-radius: 16px; border: 2px solid var(--line); background: linear-gradient(#3a3180, #2a2358); font-size: 20px; font-weight: 800; box-shadow: 0 4px 0 #120d30; }
 .pad button:active { transform: translateY(3px); box-shadow: 0 1px 0 #120d30; }
-.pad .up { grid-column: 2; grid-row: 1; }
-.pad .left { grid-column: 1; grid-row: 2; }
-.pad .wait { grid-column: 2; grid-row: 2; font-size: 14px; }
-.pad .right { grid-column: 3; grid-row: 2; }
+/* 矢印は逆 T 字（上の下に 左・下・右）。待つ系は上の段の左右に分ける。 */
 .pad .wait3 { grid-column: 1; grid-row: 1; font-size: 14px; }
-.pad .down { grid-column: 3; grid-row: 1; font-size: 20px; }
+.pad .up { grid-column: 2; grid-row: 1; }
+.pad .wait { grid-column: 3; grid-row: 1; font-size: 14px; }
+.pad .left { grid-column: 1; grid-row: 2; }
+.pad .down { grid-column: 2; grid-row: 2; font-size: 20px; }
+.pad .right { grid-column: 3; grid-row: 2; }
 
 .actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; flex: none; }
 .actions button { background: #231d4d; border: 1px solid var(--line); border-radius: 12px; padding: 4px 6px; font-size: 13px; line-height: 1.25; min-height: 44px; }
