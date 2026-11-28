@@ -496,10 +496,12 @@ function Game({ idx, onBack, onStars, onNext }: { idx: number; onBack: () => voi
         <button onClick={() => (sfx.record(), setP(endLoop(pRef.current)))} disabled={t === 0}>
           かげにする
         </button>
-        <button onClick={() => setP((c) => backLoop(c))} disabled={p.ghosts.length === 0}>
+        <button onClick={() => setP((c) => backLoop(c))} disabled={p.ghosts.length === 0} style={p.ghosts.length === 0 ? { visibility: 'hidden' } : undefined}>
           前のループへ
         </button>
-        <button onClick={() => setP(newPlay(b))}>最初から</button>
+        <button onClick={() => setP(newPlay(b))} style={p.ghosts.length === 0 && t === 0 ? { visibility: 'hidden' } : undefined}>
+          最初から
+        </button>
         {sol && (
           <button className="answer-btn" onClick={() => setAns(ans === null ? 0 : null)}>
             {ans === null ? 'こたえをみる' : 'こたえをとじる'}
